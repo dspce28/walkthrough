@@ -1,0 +1,48 @@
+# Demo brief: Modern Luxe walkthrough (handoff for the next session)
+
+## Product the client (an interior designer) wants
+1. Homeowner uploads a 2D floor plan (with sofa, kitchen etc. marked) and picks a style: modern / heritage / royal / simple.
+2. We turn it into a designed 3D interior: wall finishes, false ceilings, furniture, decor props per style.
+3. We generate a walkthrough of that design.
+4. Lighting and exposure are set to suit the design.
+5. A real city photo/skyline is visible behind windows and from open terraces.
+
+Reference look: `Apartment Interior Design 3D Walkthrough | Living, Bedroom & Kitchen | 4K` (Yantram Studio, YouTube
+puhXfWCpFeM). About 20 slow eye-level dolly shots of ~5 s; bright high-key exposure; false ceilings with warm LED coves
+and profile lights; fluted / panelled feature walls; arched niches; modular joinery with metal trims; heavy styling
+(pampas, books, sculpture, throws, cushions, plants); city view behind every window.
+
+## Decisions (agreed)
+- Demo style: **Modern Luxe** only. Royal/other styles: later.
+- Assets: **free models only** (Poly Haven CC0 + procedural). No paid models.
+- City view: **generic skyline** (Ahmedabad was requested; no free Ahmedabad 360° image exists, so a generic CC0 city HDRI is used).
+- Demo house: the existing G+2 plan (`src/plan/houses/g2House.ts`), redesigned. Note: it is only 12′ wide, rooms are small.
+
+## Architecture already in place
+- `src/plan/types.ts`: plan schema (walls, openings, stairs, rooms, items in feet). Everything renders from it.
+- `src/plan/compile.ts`: plan to boxes/colliders/walk surfaces. `src/viewer/Furniture.tsx`: item catalogue (models + procedural).
+- `src/viewer/Scene.tsx`: lights, post-processing, camera rig. `src/viewer/walk.ts`: walk + spline guided tour.
+- Offline light bake: `scripts/bake/bake.py` (Blender 5.3 `bpy` + `pyoidn`), see README "Photoreal lighting". Baked output in
+  `public/baked/g2-house/`, loaded by `src/viewer/Baked.tsx` (`BAKE_EXPOSURE`). Meshes named `arch|L<n>|*` get baked;
+  `furn|*` are furniture; anything else is excluded.
+- Site: single page (hero, 3D walkthrough, floor plans), premium dark/gold design, deployed by Vercel on push to
+  `claude/cool-turing-6emu68` -> https://house-walkthrough-topaz.vercel.app
+
+## Done in the session that wrote this brief
+- City skyline environment behind windows/terrace (CC0 HDRI).
+- Rule-based false ceilings with cove LED + profile lights (`src/style/falseCeiling.ts`), named `arch|` so the next bake includes them.
+
+## Next steps (in order)
+1. **Style kit structure** `src/style/modernLuxe.ts`: materials (white large-format marble floor, greige textured walls),
+   ceiling rules, feature-wall rules, furniture/decor choices. Apply by rules from room type, not hand placement.
+2. **Feature walls**: fluted panel TV wall (hall, master), upholstered/panel bed wall, arched temple niche, wardrobe trims.
+3. **Decor props** per room type (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
+4. **Exposure**: brighter high-key look; re-bake with neutral 3500-4000K lights (`--lamp-watts`, lamp colours in `lightAnchors`).
+5. **Re-export + re-bake** (`?export` then `bake.py`), copy to `public/baked/g2-house/`, tune `BAKE_EXPOSURE`.
+6. **Cinematic tour**: ~15 composed slow shots auto-generated per room (eye level, 5 s each), plus free walk.
+7. Later: comment pins on objects (homeowner feedback before work starts); style toggle; 2D-upload pipeline.
+
+## Working notes
+- Headless screenshots use SwiftShader: slow. Use `?q=fast`, small viewports, few shots.
+- Bake on this 4-core CPU: ~4 min per floor at 1024 px / 256 spp.
+- Commit after each step; pushing deploys production.
