@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G+2 House Plan and Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: drawing-set header with four sheets (Plans, 3D, Elevations, Notes); each sheet is a full-width working surface */
+:root{
+  --paper:#eef0ec; --sheet:#ffffff; --ink:#1b2530; --ink-soft:#586470; --line:#cbd1d0; --accent:#175f73; --accent-ink:#ffffff;
+  --warn:#9a5a00; --warn-bg:#fbf1dc; --draw:#fbfaf6;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12171a; --sheet:#1b2226; --ink:#e6ebea; --ink-soft:#9eabb0; --line:#39444a; --accent:#6fc3d8; --accent-ink:#0c1a1f;
+  --warn:#f0c370; --warn-bg:#3a2f18; --draw:#ebe9e2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12171a; --sheet:#1b2226; --ink:#e6ebea; --ink-soft:#9eabb0; --line:#39444a; --accent:#6fc3d8; --accent-ink:#0c1a1f;
+  --warn:#f0c370; --warn-bg:#3a2f18; --draw:#ebe9e2; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:34px} h2{font-size:26px} h3{font-size:20px}
+p{margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header{border-bottom:2px solid var(--ink);padding:22px 0 0}
+.head{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:flex-end;justify-content:space-between}
+.meta{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:4px 18px}
+nav{display:flex;flex-wrap:wrap;gap:4px;margin-top:16px}
+nav button{font:600 17px var(--f-display);letter-spacing:.04em;text-transform:uppercase;border:2px solid var(--ink);border-bottom:none;background:transparent;color:var(--ink);padding:8px 16px;cursor:pointer;border-radius:4px 4px 0 0}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible,select:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{padding:22px 0 60px}
+section[hidden]{display:none}
+.bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:14px}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:5px;overflow:hidden}
+.seg button{font:600 14px var(--f-body);border:none;background:transparent;color:var(--ink);padding:7px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.btn{font:600 14px var(--f-body);border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);padding:7px 12px;border-radius:5px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+label.chk{font-size:14px;display:inline-flex;gap:6px;align-items:center;color:var(--ink-soft)}
+select{font:600 14px var(--f-body);padding:7px 8px;border:1.5px solid var(--ink);border-radius:5px;background:var(--sheet);color:var(--ink);max-width:100%}
+.lead{max-width:68ch;color:var(--ink-soft);margin-bottom:16px}
+.plans{display:grid;gap:18px;grid-template-columns:repeat(3,1fr)}
+.plans.single{grid-template-columns:minmax(0,560px) minmax(220px,1fr)}
+@media (max-width:860px){.plans,.plans.single{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px}
+.card h3{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.card h3 span{font:500 12px var(--f-mono);color:var(--ink-soft);letter-spacing:0}
+.drawing{background:var(--draw);border:1px solid var(--line);border-radius:4px}
+.drawing svg{display:block;width:100%;height:auto}
+.sched h4{font:600 15px var(--f-display);letter-spacing:.05em;text-transform:uppercase;margin:14px 0 4px;color:var(--accent)}
+.sched h4:first-child{margin-top:0}
+.sched ul{margin:0;padding-left:18px;font-size:14.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-soft);margin-top:12px}
+.legend i{display:inline-block;width:22px;height:10px;vertical-align:middle;margin-right:6px;border:1px solid #2b3138}
+/* 3D */
+.stage{position:relative;background:#cfe1ea;border:1px solid var(--line);border-radius:6px;overflow:hidden;aspect-ratio:16/9;max-height:700px;width:100%}
+@media (max-width:700px){.stage{aspect-ratio:3/4}}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.hud{position:absolute;left:10px;top:10px;background:rgba(20,28,34,.78);color:#fff;font:500 12.5px var(--f-mono);padding:6px 9px;border-radius:4px;pointer-events:none;max-width:70%}
+.mini{position:absolute;right:10px;top:10px;width:92px;background:rgba(251,250,246,.93);border:1px solid #2b3138;border-radius:3px;padding:2px}
+.mini svg{display:block;width:100%;height:auto}
+.pad{position:absolute;left:12px;bottom:12px;display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(2,46px);gap:5px}
+.pad button{font-size:19px;border:none;border-radius:8px;background:rgba(20,28,34,.72);color:#fff;cursor:pointer;touch-action:none;user-select:none}
+.pad .f{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .b{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+.pad[hidden],.mini[hidden]{display:none}
+.help{font-size:14px;color:var(--ink-soft);margin-top:10px;max-width:80ch}
+.err{padding:30px;font-size:15px}
+/* Elevations */
+.elevs{display:grid;gap:18px;grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.elevs{grid-template-columns:1fr}}
+.elevs .card p{font-size:14.5px;margin-top:8px}
+.elevs dl{margin:10px 0 0;font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+.elevs dt{font-weight:700}.elevs dd{margin:0;color:var(--ink-soft)}
+/* Notes */
+.notes{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+@media (max-width:860px){.notes{grid-template-columns:1fr}}
+.notes ol,.notes ul{margin:8px 0 0;padding-left:20px;font-size:15px}
+.notes li{margin-bottom:8px}
+.flag{background:var(--warn-bg);border-left:4px solid var(--warn);padding:10px 12px;border-radius:0 4px 4px 0;font-size:15px;margin-top:10px}
+.flag b{color:var(--warn)}
+.full{grid-column:1/-1}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h1>G+2 House: Plans, 3D Walkthrough and Elevations</h1>
+      </div>
+      <div class="meta"><span>Grid 1 sq = 1′ × 1′</span><span>Clear width 12′</span><span>Ground depth 44′</span><span>Upper floors 38′ + 4′ front extension</span></div>
+    </div>
+    <nav role="tablist" aria-label="Sheets">
+      <button role="tab" data-v="plans" aria-selected="true">Floor plans</button>
+      <button role="tab" data-v="walkthrough" aria-selected="false">3D walkthrough</button>
+      <button role="tab" data-v="elevations" aria-selected="false">Front elevations</button>
+      <button role="tab" data-v="notes" aria-selected="false">Notes and questions</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+
+<section id="v-plans">
+  <p class="lead">Drawn from your three sketches at one grid square per foot, with the road at the top of each plan as in the sketches. Pick a single floor to see furniture names and the furniture list.</p>
+  <div class="bar">
+    <div class="seg" id="floorSeg" role="group" aria-label="Floor">
+      <button data-f="all" aria-pressed="true">All floors</button>
+      <button data-f="0" aria-pressed="false">Ground</button>
+      <button data-f="1" aria-pressed="false">First</button>
+      <button data-f="2" aria-pressed="false">Second</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="gridChk"> Show 1′ grid and row numbers</label>
+  </div>
+  <div class="plans" id="plans"></div>
+  <div class="legend">
+    <span><i style="background:#2b3138"></i>Wall</span>
+    <span><i style="background:#c8ccd0"></i>Parapet or railing</span>
+    <span><i style="background:#bcd9e2"></i>Window</span>
+    <span><i style="background:#fff;border-style:dashed"></i>Line of floor above</span>
+    <span>Arc = door swing</span>
+    <span>Arrow = stair going up</span>
+  </div>
+</section>
+
+<section id="v-walkthrough" hidden>
+  <div class="bar">
+    <div class="seg" id="modeSeg" role="group" aria-label="View mode">
+      <button data-m="doll" aria-pressed="true">Dollhouse view</button>
+      <button data-m="walk" aria-pressed="false">Walk inside</button>
+    </div>
+    <div class="seg" id="cutSeg" role="group" aria-label="Floors shown">
+      <button data-c="0" aria-pressed="true">Ground</button>
+      <button data-c="1" aria-pressed="false">+ First</button>
+      <button data-c="2" aria-pressed="false">+ Second</button>
+      <button data-c="3" aria-pressed="false">Whole house</button>
+    </div>
+    <select id="jump" aria-label="Go to a room"></select>
+    <button class="btn primary" id="tourBtn">Play guided tour</button>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="c3d"></canvas>
+    <div class="hud" id="hud">Loading 3D model…</div>
+    <div class="mini" id="mini" hidden></div>
+    <div class="pad" id="pad" hidden>
+      <button class="f" data-k="f" aria-label="Move forward">▲</button>
+      <button class="l" data-k="l" aria-label="Turn left">◄</button>
+      <button class="b" data-k="b" aria-label="Move back">▼</button>
+      <button class="r" data-k="r" aria-label="Turn right">►</button>
+    </div>
+  </div>
+  <p class="help" id="help"></p>
+</section>
+
+<section id="v-elevations" hidden>
+  <p class="lead">Three directions for the road face, drawn to scale as seen from the road, so the first-floor washroom is on the right and the balcony and main door are on the left. Each one hides the washroom's soil and waste pipes inside the design (blue dashed line). None uses ovals or arches.</p>
+  <div class="elevs" id="elevs"></div>
+</section>
+
+<section id="v-notes" hidden>
+  <div class="notes">
+    <div class="card full">
+      <h2>Four things in the sketches to settle before construction drawings</h2>
+      <div class="flag"><b>1. The stair to the second floor starts inside Bedroom 2.</b> On the first-floor sketch the stair up begins at column 7, rows 31 to 33, and the only way to reach it is through the 2nd bedroom. Anyone going to the office or terrace walks through that bedroom. The model shows it as drawn.</div>
+      <div class="flag"><b>2. That same stair is too short to climb comfortably.</b> The ground-floor stair has 6′ of straight run before the turn (columns 4 to 9). The first-floor stair has only 3′ (columns 7 to 9). At a 10′ floor height and 7.5″ risers, the upper flight ends up with treads about 7″ deep, which is very steep. Starting it at column 4, as on the ground floor, fixes this but removes the 4′ × 4′ space beside the wardrobes.</div>
+      <div class="flag"><b>3. The stair passes over the kitchen platform.</b> The second flight climbs above columns 10 to 12, rows 25 to 30. Above the rear end of the platform the underside of the stair is only about 5′ to 6′ from the floor, so there is no room for wall cabinets or a chimney there. The model keeps the hob and chimney at the front end (rows 23 to 24), where the ceiling is full height.</div>
+      <div class="flag"><b>4. The stairs are reached through the kitchen.</b> From the main hall you go through the glass slider, along the kitchen, and through the rear kitchen door to reach the stair. Guests going to the first-floor bedrooms pass through the kitchen.</div>
+    </div>
+    <div class="card">
+      <h2>Questions for you</h2>
+      <ol>
+        <li>Is it acceptable that the second-floor stair is entered through Bedroom 2, or should that corner become a shared lobby with the bedroom door moved?</li>
+        <li>May I start the first-floor stair at column 4 so both stairs are identical and comfortable?</li>
+        <li>What floor-to-floor height do you plan? I used 10′ (9′6″ clear).</li>
+        <li>Which direction does the road face? This decides the temple orientation, sunlight in the balcony and where the terrace needs shade.</li>
+        <li>Second floor, columns 9 to 12, rows 27 to 37 are blank in the sketch. I treated rows 25 to 33 as the open stairwell and rows 34 to 37 as a lobby with the rear window. Is that right?</li>
+        <li>First-floor rear washroom: the sketch shows no door. I placed it on the side facing the window bay. It also has no window or ventilator in the rear wall. Should I add one?</li>
+        <li>Is there any open margin or parking space between the road and the main door, or does the house start at the plot line?</li>
+        <li>Second-floor office pantry: is a counter with sink, an induction hob and an under-counter fridge enough, or do you want a gas connection and a full-height fridge?</li>
+        <li>Is the water tank in the wash yard an underground sump, or an above-ground tank as drawn?</li>
+        <li>Which elevation direction should I develop further and put on the 3D model?</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>What I assumed</h2>
+      <ul>
+        <li>Walls drawn as full grid cells are 1′ thick. Thin lines between rooms are 4″ partitions.</li>
+        <li>Side walls are solid on both sides, as marked, so daylight comes only from the front and rear.</li>
+        <li>The 4′ extension on the first and second floors is a cantilever with no columns below. The washroom and balcony walls sit inside those 4′.</li>
+        <li>Doors are 2′6″ to 2′9″ wide and 7′ high. The main door is a 3′10″ double door. Windows have a 2′6″ sill.</li>
+        <li>Both stairs have 16 risers of 7.5″.</li>
+        <li>TV unit and temple sit in 6″-deep niches in the right wall, at the rows you marked.</li>
+        <li>The second-floor front is an open terrace with a pergola over the front 8′.</li>
+      </ul>
+      <h2 style="margin-top:18px">Interior style</h2>
+      <ul>
+        <li>Ivory walls, walnut wood, brass details, marble-look floor in the hall, wood floors in bedrooms and office.</li>
+        <li>Sage green and burgundy upholstery, bordered rugs, chandeliers over the lounge, dining table and master bed.</li>
+        <li>Cream shaker kitchen cabinets with black granite tops.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ================= MODEL ================= */
+var FH=10, CH=9.5;
+var MAT={
+ wall:'#efe7d6', slab:'#f4f0e6', slabG:'#bdb7a8', stair:'#e2dccd', tread:'#6a472c',
+ walnut:'#5b3a24', walnutD:'#3f2819', door:'#6f4529', panel:'#4a3020', teak:'#8a5a33',
+ brass:'#b8944d', gold:'#cfa646', glass:'#9fcbd6', mirror:'#cfe1e6',
+ white:'#f6f4ee', linen:'#ece3d0', sage:'#73856a', sageL:'#8d9d82', burgundy:'#7a2f35', burgundyL:'#96484d',
+ navy:'#2f4159', navyL:'#48607f', rug:'#7a2f35', rugIn:'#dcc9a0', rugB:'#33506c', rugBIn:'#d9cfb6',
+ granite:'#2c2a29', marbleTop:'#ebe8e0', cab:'#ebe1cc', steel:'#b7bcc0', black:'#1b1b1e', chrome:'#c8cdd1',
+ terracotta:'#b5653f', leaf:'#4c7944', leafL:'#6d9c56', glow:'#fff0bf', shade:'#f3e7c6',
+ tileD:'#a3b6ba', curtain:'#b89a6a', art1:'#49685d', art2:'#8a4b3a', art3:'#2f4159',
+ book1:'#7a2f35', book2:'#2f4159', book3:'#c9a24a', cane:'#c69c5e', tank:'#8c989f', railing:'#efe7d6', fabric:'#c9b48d'
+};
+var P=[],COL=[],SURF=[],DOORS=[],WINS=[],ROOMS=[],FLOORS=[],LABELS=[],ARROWS=[],SLABS=[[],[],[]],DASH=[];
+function mm(a,b){return a<b?[a,b]:[b,a];}
+function B(L,x1,y1,x2,y2,z0,z1,m,o){o=o||{};var X=mm(x1,x2),Y=mm(y1,y2);
+  var p={k:'b',L:L,x1:X[0],x2:X[1],y1:Y[0],y2:Y[1],z0:z0,z1:z1,m:m,cat:o.cat||'furn',np:!!o.np};P.push(p);
+  if(o.col)COL.push({x1:p.x1,x2:p.x2,y1:p.y1,y2:p.y2,z0:L*FH+z0,z1:L*FH+z1});return p;}
+function C(L,cx,cy,r,z0,z1,m,o){o=o||{};P.push({k:'c',L:L,cx:cx,cy:cy,r:r,z0:z0,z1:z1,m:m,cat:o.cat||'furn',np:!!o.np});}
+function S(L,cx,cy,cz,r,m,o){o=o||{};P.push({k:'s',L:L,cx:cx,cy:cy,r:r,z0:cz-r,z1:cz+r,m:m,cat:o.cat||'furn',np:!!o.np});}
+function AT(L,ax,a1,a2,t1,t2,z0,z1,m,o){return ax==='h'?B(L,a1,t1,a2,t2,z0,z1,m,o):B(L,t1,a1,t2,a2,z0,z1,m,o);}
+function wall(L,x1,y1,x2,y2,z0,z1,m){z0=z0||0;z1=(z1==null)?CH:z1;B(L,x1,y1,x2,y2,z0,z1,m||'wall',{cat:'wall',col:z0<3});}
+function wallAT(L,ax,a1,a2,t1,t2){AT(L,ax,a1,a2,t1,t2,0,CH,'wall',{cat:'wall',col:true});}
+function surf(x1,y1,x2,y2,z){var X=mm(x1,x2),Y=mm(y1,y2);SURF.push({x1:X[0],x2:X[1],y1:Y[0],y2:Y[1],z:z});}
+function slab(L,x1,y1,x2,y2){B(L,x1,y1,x2,y2,-0.5,0,'slab',{cat:'slab'});SLABS[L].push([x1,y1,x2,y2]);surf(x1,y1,x2,y2,L*FH);}
+function floor(L,x1,y1,x2,y2,t){FLOORS.push({L:L,x1:x1,y1:y1,x2:x2,y2:y2,t:t});}
+function room(L,name,x1,y1,x2,y2,dim,lx,ly){ROOMS.push({L:L,name:name,x1:x1,y1:y1,x2:x2,y2:y2,dim:dim,lx:lx==null?(x1+x2)/2:lx,ly:ly==null?(y1+y2)/2:ly});}
+
+function door(L,ax,a1,a2,t1,t2,o){o=o||{};var w=o.w||2.6,off=(o.off!=null)?o.off:(a2-a1-w)/2,oa=a1+off,ob=oa+w,head=o.head||7,f=0.12,lt=0.12,sw=o.sw||1,hg=o.hinge||'a1';
+  if(oa-a1>0.02)wallAT(L,ax,a1,oa,t1,t2); if(a2-ob>0.02)wallAT(L,ax,ob,a2,t1,t2);
+  AT(L,ax,oa,ob,t1,t2,head,CH,'wall',{cat:'lintel'});
+  AT(L,ax,oa,oa+f,t1-0.03,t2+0.03,0,head,'walnut',{cat:'frame'});AT(L,ax,ob-f,ob,t1-0.03,t2+0.03,0,head,'walnut',{cat:'frame'});AT(L,ax,oa,ob,t1-0.03,t2+0.03,head-f,head,'walnut',{cat:'frame'});
+  function leaf(aa,len){var ta=sw>0?t2:t1-len;AT(L,ax,aa,aa+lt,ta,ta+len,0.05,head-f,o.m||'door',{cat:'door'});
+    AT(L,ax,aa-0.05,aa+lt+0.05,ta+len-0.5,ta+len-0.35,3.2,3.5,'brass',{cat:'door'});}
+  if(o.dbl){leaf(oa+f,w/2-f);leaf(ob-f-lt,w/2-f);}else if(hg==='a1')leaf(oa+f,w-2*f);else leaf(ob-f-lt,w-2*f);
+  DOORS.push({L:L,ax:ax,oa:oa,ob:ob,t1:t1,t2:t2,sw:sw,hinge:hg,dbl:!!o.dbl,w:w});}
+function win(L,ax,a1,a2,t1,t2,o){o=o||{};var oa=a1+(o.off||0),ob=o.w?oa+o.w:a2,sill=(o.sill==null)?2.5:o.sill,head=o.head||7.5,tm=(t1+t2)/2,f=0.12;
+  if(oa-a1>0.02)wallAT(L,ax,a1,oa,t1,t2); if(a2-ob>0.02)wallAT(L,ax,ob,a2,t1,t2);
+  AT(L,ax,oa,ob,t1,t2,0,sill,'wall',{cat:'sill',col:true});AT(L,ax,oa,ob,t1,t2,head,CH,'wall',{cat:'lintel'});
+  AT(L,ax,oa,ob,tm-0.03,tm+0.03,sill,head,'glass',{cat:'glass'});
+  AT(L,ax,oa,ob,tm-0.1,tm+0.1,sill,sill+f,'walnut',{cat:'frame'});AT(L,ax,oa,ob,tm-0.1,tm+0.1,head-f,head,'walnut',{cat:'frame'});
+  var n=Math.max(1,Math.round((ob-oa)/2));for(var i=0;i<=n;i++){var a=oa+(ob-oa-f)*i/n;AT(L,ax,a,a+f,tm-0.1,tm+0.1,sill,head,'walnut',{cat:'frame'});}
+  if(o.curt){var ti=o.curt>0?t2+0.12:t1-0.24;AT(L,ax,oa-0.4,oa+0.8,ti,ti+0.12,0.2,8.3,'curtain',{np:true});AT(L,ax,ob-0.8,ob+0.4,ti,ti+0.12,0.2,8.3,'curtain',{np:true});AT(L,ax,oa-0.5,ob+0.5,ti+0.02,ti+0.1,8.3,8.4,'brass',{np:true});}
+  WINS.push({L:L,ax:ax,oa:oa,ob:ob,t1:t1,t2:t2});}
+function balustrade(L,ax,a1,a2,t,h){h=h||3.4;AT(L,ax,a1,a2,t-0.15,t+0.15,h-0.25,h,'white',{cat:'wall',col:true});AT(L,ax,a1,a2,t-0.15,t+0.15,0,0.3,'white',{cat:'rail'});
+  COL.push(ax==='h'?{x1:a1,x2:a2,y1:t-0.15,y2:t+0.15,z0:L*FH,z1:L*FH+h}:{x1:t-0.15,x2:t+0.15,y1:a1,y2:a2,z0:L*FH,z1:L*FH+h});
+  for(var a=a1+0.3;a<a2-0.1;a+=0.55){if(ax==='h')C(L,a,t,0.1,0.3,h-0.25,'white',{cat:'rail',np:true});else C(L,t,a,0.1,0.3,h-0.25,'white',{cat:'rail',np:true});}}
+function flight(L,ax,from,to,c1,c2,zs,n,landZ){var r=(landZ-zs)/n,len=(to-from)/(n-1);
+  for(var i=1;i<n;i++){var a=from+(i-1)*len,b=from+i*len,z=zs+i*r,x1,x2,y1,y2;if(ax==='x'){x1=a;x2=b;y1=c1;y2=c2;}else{x1=c1;x2=c2;y1=a;y2=b;}
+    B(L,x1,y1,x2,y2,Math.max(0,z-r-0.3),z-0.05,'stair',{cat:'stair'});B(L,x1,y1,x2,y2,z-0.05,z,'tread',{cat:'stair'});surf(x1,y1,x2,y2,L*FH+z);}}
+function landing(L,x1,y1,x2,y2,z){B(L,x1,y1,x2,y2,z-0.45,z-0.05,'stair',{cat:'stair'});B(L,x1,y1,x2,y2,z-0.05,z,'tread',{cat:'stair'});surf(x1,y1,x2,y2,L*FH+z);}
+
+function piece(L,label,x,y,rot,w,d,fn){
+  function T(lx,ly){return rot===0?[x+lx,y+ly]:rot===1?[x+d-ly,y+lx]:rot===2?[x+w-lx,y+d-ly]:[x+ly,y+w-lx];}
+  function b(a1,b1,a2,b2,z0,z1,m,o){var p=T(a1,b1),q=T(a2,b2);B(L,p[0],p[1],q[0],q[1],z0,z1,m,o);}
+  function c(cx,cy,r,z0,z1,m,o){var p=T(cx,cy);C(L,p[0],p[1],r,z0,z1,m,o);}
+  function s(cx,cy,cz,r,m,o){var p=T(cx,cy);S(L,p[0],p[1],cz,r,m,o);}
+  fn(b,c,s);var bw=(rot%2)?d:w,bd=(rot%2)?w:d;if(label)LABELS.push({L:L,t:label,x:x+bw/2,y:y+bd/2});}
+function legs(b,w,d,h,m){[[0.05,0.05],[w-0.25,0.05],[0.05,d-0.25],[w-0.25,d-0.25]].forEach(function(q){b(q[0],q[1],q[0]+0.2,q[1]+0.2,0,h,m||'walnutD');});}
+
+/* furniture builders: local back edge at ly=0, front faces +ly */
+function sofa(L,x,y,rot,w,label,col,d){col=col||'sage';d=d||2.8;piece(L,label,x,y,rot,w,d,function(b){var cl=col+'L';
+  b(0,0,w,d,0.3,1.25,col);b(0,0,w,0.65,1.25,2.7,col);b(0,0,0.5,d,1.25,2.05,col);b(w-0.5,0,w,d,1.25,2.05,col);
+  var n=Math.max(1,Math.round((w-1)/2.1)),cw=(w-1)/n;for(var i=0;i<n;i++){b(0.5+i*cw+0.04,0.65,0.5+(i+1)*cw-0.04,d-0.08,1.25,1.6,cl);b(0.5+i*cw+0.1,0.65,0.5+(i+1)*cw-0.1,0.95,1.6,2.5,cl);}
+  legs(b,w,d,0.3);});}
+function table(L,x,y,rot,w,d,h,label,top){piece(L,label,x,y,rot,w,d,function(b){b(0,0,w,d,h-0.15,h,top||'walnut');b(0.2,0.2,w-0.2,d-0.2,h-0.3,h-0.15,'walnutD');legs(b,w,d,h-0.3);});}
+function coffee(L,x,y,w,d,label){piece(L,label,x,y,0,w,d,function(b,c,s){b(0,0,w,d,1.2,1.33,'marbleTop');b(0.15,0.15,w-0.15,d-0.15,0.4,0.5,'walnut');legs(b,w,d,1.2,'brass');c(w/2,d/2,0.22,1.33,1.75,'brass');s(w/2,d/2,2,0.3,'leafL');});}
+function rug(L,x,y,w,d,blue){piece(L,null,x,y,0,w,d,function(b){b(0,0,w,d,0.03,0.06,blue?'rugB':'rug',{cat:'rug'});b(0.4,0.4,w-0.4,d-0.4,0.06,0.075,blue?'rugBIn':'rugIn',{cat:'rug'});b(0.8,0.8,w-0.8,d-0.8,0.075,0.09,blue?'rugB':'rug',{cat:'rug'});});}
+function chair(L,x,y,rot,m){piece(L,null,x,y,rot,1.5,1.5,function(b){b(0.1,0.2,1.4,1.5,1.35,1.55,m||'fabric');b(0.1,0.08,1.4,0.25,1.55,3.2,'walnut');legs(b,1.5,1.5,1.35);});}
+function stool(L,cx,cy){C(L,cx,cy,0.55,2.0,2.15,'burgundy');C(L,cx,cy,0.08,0,2.0,'brass');C(L,cx,cy,0.4,0,0.06,'brass');}
+function plant(L,cx,cy,sc){sc=sc||1;C(L,cx,cy,0.5*sc,0,1.2*sc,'terracotta');S(L,cx,cy,2.3*sc,1.0*sc,'leaf');S(L,cx+0.25*sc,cy-0.2*sc,3.3*sc,0.75*sc,'leafL');}
+function chandelier(L,cx,cy,r){r=r||1.1;C(L,cx,cy,0.04,7.6,9.5,'brass',{np:true});C(L,cx,cy,r,7.4,7.55,'brass',{np:true});C(L,cx,cy,0.25,7.0,7.6,'brass',{np:true});
+  for(var i=0;i<6;i++){var a=i*Math.PI/3;S(L,cx+Math.cos(a)*r,cy+Math.sin(a)*r,7.8,0.2,'glow',{np:true});}}
+function frame(L,ax,a,len,t,side,z0,z1,art){AT(L,ax,a,a+len,t,t+side*0.06,z0,z1,'brass',{np:true});AT(L,ax,a+0.12,a+len-0.12,t,t+side*0.09,z0+0.12,z1-0.12,art||'art1',{np:true});}
+function tvUnit(L,x,y,rot,w,label){piece(L,label,x,y,rot,w,1.5,function(b){
+  b(0,0,w,0.12,0,7.4,'panel');b(1.1,0.12,w-1.1,1.5,0.25,1.7,'walnut');b(1.1,0.12,w-1.1,1.5,1.7,1.8,'marbleTop');
+  b(w/2-2.2,0.12,w/2+2.2,0.3,3,5.6,'black');
+  [0,w-1].forEach(function(o){b(o,0.12,o+1,1.0,0,7.4,'walnut');for(var z=1.6;z<7;z+=1.4)b(o-0.02,0.12,o+1.02,1.04,z,z+0.08,'brass');b(o+0.2,0.3,o+0.8,0.9,4.5,5.3,'book1');b(o+0.25,0.3,o+0.75,0.9,3.1,3.7,'book3');});});}
+function templeUnit(L,x,y,rot,label){piece(L,label,x,y,rot,3,1.5,function(b,c,s){
+  b(0,0,3,1.5,0,2.5,'walnut');b(0,0,3,1.5,2.5,2.65,'marbleTop');b(0.05,0,2.95,0.1,2.65,6.4,'gold');
+  c(0.3,1.2,0.12,2.65,5.6,'white');c(2.7,1.2,0.12,2.65,5.6,'white');b(0,0,3,1.45,5.6,5.9,'white');b(0.4,0.1,2.6,1.2,5.9,6.3,'white');b(0.9,0.2,2.1,1.0,6.3,6.8,'white');c(1.5,0.6,0.12,6.8,7.3,'gold');
+  b(1.15,0.2,1.85,0.7,2.65,3.0,'brass');b(1.3,0.3,1.7,0.6,3.0,3.9,'gold');s(1.5,0.45,4.1,0.22,'gold');s(0.6,1.0,2.8,0.12,'glow');s(2.4,1.0,2.8,0.12,'glow');
+  for(var i=0;i<3;i++)b(0.15+i*0.95,1.5,0.15+i*0.95+0.8,1.52,0.3,2.2,'walnutD');});}
+function bed(L,x,y,rot,w,d,label,col){piece(L,label,x,y,rot,w,d,function(b){
+  b(0,0,w,0.3,0,4.3,'walnut');for(var i=0;i<3;i++)b(0.25+i*(w-0.5)/3+0.08,0.3,0.25+(i+1)*(w-0.5)/3-0.08,0.36,2.2,4.0,'linen');
+  b(0,0.3,w,d,0.3,1.2,'walnut');b(0.1,0.35,w-0.1,d-0.1,1.2,2.0,'white');
+  b(0.4,0.55,w/2-0.2,1.7,2.0,2.35,'linen');b(w/2+0.2,0.55,w-0.4,1.7,2.0,2.35,'linen');
+  b(0.08,d*0.48,w-0.08,d-0.08,2.0,2.1,col||'burgundy');b(0.08,d*0.4,w-0.08,d*0.48,2.0,2.12,'linen');legs(b,w,d,0.3);});}
+function nightstand(L,x,y,rot,w){w=w||1.5;piece(L,null,x,y,rot,w,1.4,function(b,c){b(0,0,w,1.4,0.2,1.9,'walnut');b(0.1,1.4,w-0.1,1.42,1.1,1.75,'walnutD');b(w/2-0.15,1.42,w/2+0.15,1.46,1.4,1.46,'brass');
+  c(w/2,0.6,0.12,1.9,2.7,'brass');c(w/2,0.6,0.38,2.7,3.4,'shade');legs(b,w,1.4,0.2);});}
+function wardrobe(L,x,y,rot,w,label,h){h=h||8;piece(L,label,x,y,rot,w,2,function(b){b(0,0,w,2,0,h,'walnut');b(0,0,w,2.03,h,h+0.25,'walnutD');
+  var n=Math.round(w/1.6),dw=w/n;for(var i=0;i<n;i++){b(i*dw+0.06,2,(i+1)*dw-0.06,2.04,0.3,h-0.2,'walnutD');b(i*dw+0.3,2.04,(i+1)*dw-0.3,2.06,0.7,h-0.6,'walnut');b((i%2?i*dw+0.14:(i+1)*dw-0.2),2.04,(i%2?i*dw+0.2:(i+1)*dw-0.14),2.1,3.2,4.2,'brass');}});}
+function dresser(L,x,y,rot,w,label){piece(L,label,x,y,rot,w,1.4,function(b,c){b(0,0,w,1.4,0.25,2.6,'walnut');b(0,0,w,1.42,2.6,2.7,'marbleTop');for(var i=0;i<2;i++)b(0.1,1.4,w-0.1,1.43,0.5+i*1.05,1.4+i*1.05,'walnutD');
+  b(0.25,0,w-0.25,0.08,3.0,6.4,'brass');b(0.37,0,w-0.37,0.11,3.12,6.28,'mirror');legs(b,w,1.4,0.25);c(w/2,2.3,0.6,0,1.4,'burgundy');});}
+function desk(L,x,y,rot,w,d,label){piece(L,label,x,y,rot,w,d,function(b,c){b(0,0,w,d,2.35,2.5,'walnut');b(0,0,1.4,d-0.1,0.2,2.35,'walnut');b(w-0.2,0,w,d-0.1,0,2.35,'walnut');b(1.4,0,w-0.2,0.1,0.9,2.35,'walnutD');
+  b(0.1,d-0.1,1.3,d-0.07,0.4,2.2,'walnutD');c(w-0.7,0.6,0.1,2.5,3.4,'brass');c(w-0.7,0.6,0.35,3.4,4.0,'shade');b(w/2-0.7,0.5,w/2+0.7,1.4,2.5,2.56,'black');});}
+function officeChair(L,cx,cy,rot){piece(L,null,cx-0.9,cy-0.9,rot,1.8,1.8,function(b,c){c(0.9,0.9,0.75,0,0.12,'black');c(0.9,0.9,0.1,0.12,1.4,'chrome');b(0.15,0.25,1.65,1.7,1.4,1.75,'burgundy');b(0.15,0.1,1.65,0.4,1.75,3.9,'burgundy');b(0,0.4,0.18,1.4,2.1,2.3,'walnutD');b(1.62,0.4,1.8,1.4,2.1,2.3,'walnutD');});}
+function bookshelf(L,x,y,rot,w,label,h){h=h||7.2;piece(L,label,x,y,rot,w,1.1,function(b){b(0,0,w,0.08,0,h,'walnutD');b(0,0,0.1,1.1,0,h,'walnut');b(w-0.1,0,w,1.1,0,h,'walnut');
+  var cols=['book1','book2','book3','art1','linen'];for(var z=0.2,k=0;z<h;z+=1.4,k++){b(0,0,w,1.1,z,z+0.1,'walnut');if(z+1.3<h)for(var a=0.25,i=0;a<w-0.6;a+=0.45,i++)if((i+k)%4!==3)b(a,0.25,a+0.38,0.95,z+0.1,z+0.75+((i*7+k*3)%4)*0.1,cols[(i+k)%5]);}
+  b(0,0,w,1.1,h,h+0.12,'walnut');});}
+function consoleT(L,x,y,rot,w,label){piece(L,label,x,y,rot,w,1.1,function(b,c,s){b(0,0,w,1.1,2.4,2.55,'marbleTop');b(0.1,0.1,w-0.1,1.0,2.0,2.4,'walnut');legs(b,w,1.1,2.0,'walnut');c(w*0.3,0.55,0.18,2.55,3.1,'brass');s(w*0.3,0.55,3.4,0.35,'leafL');
+  b(0.15,0,w-0.15,0.06,3.2,5.8,'brass',{np:true});b(0.27,0,w-0.27,0.09,3.32,5.68,'mirror',{np:true});});}
+function sideboard(L,x,y,rot,w,label){piece(L,label,x,y,rot,w,1.3,function(b,c,s){b(0,0,w,1.3,0.3,2.9,'walnut');b(0,0,w,1.33,2.9,3.0,'marbleTop');var n=Math.round(w/1.4),dw=w/n;for(var i=0;i<n;i++){b(i*dw+0.08,1.3,(i+1)*dw-0.08,1.33,0.5,2.75,'walnutD');b((i+0.5)*dw-0.04,1.33,(i+0.5)*dw+0.04,1.37,1.5,1.9,'brass');}
+  legs(b,w,1.3,0.3);b(0.2,0,w-0.2,0.1,3.6,7.2,'walnut');for(var z=4.5;z<7;z+=1.2)b(0.2,0,w-0.2,0.9,z,z+0.08,'walnut');b(0.2,0,0.3,0.9,3.6,7.2,'walnut');b(w-0.3,0,w-0.2,0.9,3.6,7.2,'walnut');
+  for(var a=0.6;a<w-0.7;a+=0.8){c(a,0.5,0.22,4.58,4.9,'white');c(a+0.2,0.5,0.18,5.78,6.2,'gold');}});}
+function wc(L,x,y,rot){piece(L,'WC',x,y,rot,1.7,2.2,function(b,c){b(0.2,0,1.5,0.6,1.1,2.7,'white');b(0.3,0.5,1.4,1.2,0,1.3,'white');c(0.85,1.5,0.62,0,1.3,'white');c(0.85,1.5,0.5,1.3,1.38,'linen');b(0.6,0,1.1,0.62,2.7,2.76,'chrome');});}
+function vanity(L,x,y,rot,w,label){piece(L,label||'Basin',x,y,rot,w,1.6,function(b,c){b(0,0,w,1.5,0.4,2.6,'walnut');b(0,0,w,1.6,2.6,2.75,'marbleTop');c(w/2,0.85,0.52,2.75,2.95,'white');c(w/2,0.85,0.4,2.95,2.97,'tileD');b(w/2-0.05,0.15,w/2+0.05,0.45,2.75,3.3,'chrome');
+  b(0.1,0,w-0.1,0.06,3.5,6.4,'brass',{np:true});b(0.2,0,w-0.2,0.09,3.6,6.3,'mirror',{np:true});});}
+function shower(L,x,y,rot,w,d,open){piece(L,'Shower',x,y,rot,w,d,function(b,c){b(0,0,w,d,0.03,0.12,'tileD',{cat:'rug'});
+  if(open==='front'){b(0,d-0.06,w-1.9,d,0.12,6.8,'glass',{cat:'glass'});}else{b(w-0.06,0,w,d-1.9,0.12,6.8,'glass',{cat:'glass'});}
+  b(w/2-0.04,0,w/2+0.04,0.1,3,7,'chrome',{np:true});b(w/2-0.04,0,w/2+0.04,0.8,6.9,7,'chrome',{np:true});c(w/2,0.8,0.35,6.75,6.9,'chrome',{np:true});});}
+function counter(L,x,y,rot,w,d,label,o){o=o||{};piece(L,label,x,y,rot,w,d,function(b,c){var h=o.h||2.75;b(0,0,w,d-0.1,0.3,h-0.15,'cab');b(0.05,0,w-0.05,d-0.2,0,0.3,'walnutD');b(0,0,w,d,h-0.15,h,'granite');
+  var n=Math.max(1,Math.round(w/1.5)),dw=w/n;for(var i=0;i<n;i++){b(i*dw+0.06,d-0.1,(i+1)*dw-0.06,d-0.07,0.45,h-0.3,'linen');b((i+0.5)*dw-0.25,d-0.07,(i+0.5)*dw+0.25,d-0.03,h-0.6,h-0.54,'brass');}
+  if(o.sink!=null){b(o.sink,0.35,o.sink+1.7,d-0.4,h,h+0.02,'steel');b(o.sink+0.15,0.5,o.sink+1.55,d-0.55,h+0.02,h+0.03,'tank');b(o.sink+0.8,0.15,o.sink+0.9,0.3,h,h+0.9,'chrome');b(o.sink+0.8,0.15,o.sink+0.9,0.8,h+0.8,h+0.9,'chrome');}
+  if(o.hob!=null){b(o.hob,0.4,o.hob+2.2,d-0.4,h,h+0.06,'black');c(o.hob+0.6,d/2,0.32,h+0.06,h+0.12,'steel');c(o.hob+1.6,d/2,0.32,h+0.06,h+0.12,'steel');
+    if(o.chim){b(o.hob-0.1,0,o.hob+2.3,1.6,5.4,5.9,'steel',{np:true});b(o.hob+0.6,0,o.hob+1.6,0.9,5.9,o.chim,'steel',{np:true});}}
+  if(o.up){o.up.forEach(function(u){b(u[0],0,u[1],1.1,5.0,7.4,'cab',{np:true});var m=Math.max(1,Math.round((u[1]-u[0])/1.5)),uw=(u[1]-u[0])/m;for(var j=0;j<m;j++){b(u[0]+j*uw+0.06,1.1,u[0]+(j+1)*uw-0.06,1.13,5.1,7.3,'linen',{np:true});b(u[0]+(j+0.5)*uw-0.04,1.13,u[0]+(j+0.5)*uw+0.04,1.17,5.2,5.6,'brass',{np:true});}});}
+  if(o.fn)o.fn(b,c,h);});}
+function fridge(L,x,y,rot,w,d,h,label){piece(L,label,x,y,rot,w,d,function(b){b(0,0,w,d,0.1,h,'steel');b(0,d,w,d+0.02,h*0.62,h*0.63,'black');b(w-0.3,d,w-0.22,d+0.1,h*0.2,h*0.55,'chrome');b(w-0.3,d,w-0.22,d+0.1,h*0.68,h*0.92,'chrome');});}
+function caneChair(L,x,y,rot){piece(L,null,x,y,rot,1.8,1.8,function(b){b(0,0.2,1.8,1.8,1.2,1.45,'cane');b(0,0,1.8,0.3,1.45,2.9,'cane');b(0,0.2,0.2,1.8,1.45,2.1,'cane');b(1.6,0.2,1.8,1.8,1.45,2.1,'cane');b(0.2,0.3,1.6,1.7,1.45,1.65,'linen');legs(b,1.8,1.8,1.2,'cane');});}
+function planter(L,x1,y1,x2,y2){B(L,x1,y1,x2,y2,0,1.5,'terracotta');var n=Math.max(1,Math.round(Math.max(x2-x1,y2-y1)/1.3));for(var i=0;i<n;i++){var t=(i+0.5)/n,cx=(x2-x1>y2-y1)?x1+(x2-x1)*t:(x1+x2)/2,cy=(x2-x1>y2-y1)?(y1+y2)/2:y1+(y2-y1)*t;S(L,cx,cy,2.0+(i%2)*0.3,0.65,i%2?'leafL':'leaf');}}
+
+/* ---------- GROUND FLOOR ---------- */
+(function(){var L=0;
+B(0,-1,-5,13,45,-0.3,0,'slabG',{cat:'slab'});SLABS[0].push([0,0,12,44]);surf(-1,-5,13,45,0);surf(-30,-45,42,-5,0);
+// side walls with TV and temple niches
+wall(L,-1,-1,0,38);wall(L,12,-1,13,4);wall(L,12.6,4,13,11);B(L,12,4,12.6,11,7.6,CH,'wall',{cat:'lintel'});wall(L,12,11,13,16);wall(L,12.6,16,13,19);B(L,12,16,12.6,19,7.4,CH,'wall',{cat:'lintel'});wall(L,12,19,13,38);
+wall(L,-1,38,0,45,0,7);wall(L,12,38,13,45,0,7);wall(L,-1,44,13,45,0,7);
+// front
+wall(L,0,-1,1,0);win(L,'h',1,7,-1,0,{curt:1});wall(L,7,-1,8,0);door(L,'h',8,12,-1,0,{w:3.8,dbl:true,sw:1,head:7.5});
+// row 21: glass slider (pocket) + wall
+wall(L,3,20,12,21);B(L,0,20,3,21,7,CH,'wall',{cat:'lintel'});B(L,1.5,20.45,4.5,20.55,0.05,7,'glass',{cat:'glass'});B(L,1.5,20.42,1.62,20.58,0.05,7,'walnut',{cat:'frame'});
+DOORS.push({L:0,ax:'h',oa:0,ob:3,t1:20,t2:21,slider:true});
+// row 30
+door(L,'h',0,3,29,30,{w:2.7,sw:-1,hinge:'a1'});wall(L,3,29,9,30);wall(L,9,29,12,30,0,4.5);
+// stair to first floor
+flight(L,'x',3,9,30,33,0,8,5);landing(L,9,30,12,33,5);flight(L,'y',30,24,9,12,5,8,10);
+B(L,8.85,24,9,29,5.2,CH,'wall',{cat:'lintel'});
+ARROWS.push({L:0,pts:[[3.4,31.5],[10.5,31.5],[10.5,24.6]]});
+// washroom
+wall(L,3,32.83,12,33.17);door(L,'v',33,36,3,4,{w:2.5,sw:1,hinge:'a1'});wall(L,3,36,4,37);
+// row 38
+door(L,'h',0,3,37,38,{w:2.7,sw:1,hinge:'a1'});wall(L,3,37,12,38);
+// finishes and rooms
+floor(L,0,-5,12,-1,'stone');floor(L,0,-1,12,21,'marble');floor(L,0,20.4,12,30,'tile2');floor(L,0,29.6,3.5,38,'tile2');floor(L,4,33.17,12,37,'tile');floor(L,0,38,12,44,'stone');
+room(L,'Main Hall',0,0,12,20,"12′ × 20′",6,10.6);room(L,'Kitchen',0,21,12,29,"12′ × 8′",5.6,25.4);room(L,'Passage',0,30,3,37,"3′ wide",1.5,34.6);
+room(L,'Washroom',4,33,12,37,"8′ × 4′",8,33.75);room(L,'Wash Yard',0,38,12,44,"12′ × 6′",5,41.3);room(L,'Entrance porch',0,-5,12,-1,"under 1st-floor extension",6,-3);
+DASH.push({L:0,r:[-1,-5,13,-1]});
+// --- main hall furniture
+rug(L,3.3,3.5,6.2,8);
+sofa(L,0.2,4,3,7,'3-seat sofa','sage');sofa(L,1.6,0.4,0,4.8,'Loveseat','burgundy',2.7);
+coffee(L,4.6,5.6,2.8,3.8,'Centre table');
+tvUnit(L,11.1,4,1,7,'TV unit');
+consoleT(L,10.9,2.2,1,1.6,null);
+templeUnit(L,11.1,16,1,'Temple');
+table(L,3.9,13,0,2.9,5,2.5,'Dining 6-seat','walnut');
+[13.2,14.75,16.3].forEach(function(yy){chair(L,2.4,yy,3,'burgundy');chair(L,6.8,yy,1,'burgundy');});
+sideboard(L,4.2,18.7,2,4.8,'Crockery unit');
+plant(L,0.8,12.1);plant(L,7.4,0.8,0.8);plant(L,11.2,12.4,0.8);
+chandelier(L,6,7.5,1.2);chandelier(L,5.35,15.5,0.9);
+frame(L,'v',5.2,2,0,1,4.4,6.2,'art1');frame(L,'v',7.6,2,0,1,4.4,6.2,'art2');frame(L,'v',9.9,1.2,0,1,4.6,6.0,'art3');frame(L,'v',13.6,3.6,0,1,4.2,6.6,'art3');
+// --- kitchen
+counter(L,3.2,21,0,5.8,2,'Serving table',{h:3.1,up:[[0,5.8]]});
+[4.2,5.6,7.0,8.4].forEach(function(xx){stool(L,xx,23.7);});
+counter(L,9.5,21,1,8,2.5,'Kitchen platform',{hob:1.4,chim:9.4,up:[[0,3.4]],fn:function(b,c,h){b(0.1,0,1.1,0.4,4.3,5.7,'white',{np:false});b(0.3,0.4,0.9,0.45,4.6,5.2,'navy');c(5.2,1.2,0.3,h,h+0.5,'steel');c(6.4,1.2,0.25,h,h+0.8,'terracotta');}});
+LABELS.push({L:0,t:'Water purifier',x:10.6,y:21.5});
+fridge(L,3.2,26.7,2,2.6,2.3,6.2,'Fridge');
+counter(L,5.9,27,2,3.6,2,'Sink',{sink:0.9,up:[[0,3.6]]});
+// --- washroom
+vanity(L,4.3,35.4,2,2,'Basin');wc(L,7.2,34.8,2);shower(L,9.4,33.2,0,2.6,3.8,'side');
+// --- wash yard
+counter(L,3,38,0,3,1.2,'Undertop washbasin',{sink:0.6,h:2.7});counter(L,6,38,0,4,1.2,'Wash counter',{h:2.7});
+piece(L,'Washing machine',10,38,0,2,2,function(b,c){b(0,0,2,2,0,3,'white');c(1,2,0.6,0.9,2.1,'steel',{np:true});b(0.2,1.98,1.8,2.02,2.5,2.8,'black');});
+piece(L,'Water tank',10,40,0,2,4,function(b){b(0,0,2,4,0,4.5,'tank');b(0.5,1.4,1.5,2.6,4.5,4.6,'black');});
+piece(L,'Drying rack',1,42.3,0,6,1.2,function(b){b(0,0,6,0.08,4.4,4.5,'chrome');b(0,1.12,6,1.2,4.4,4.5,'chrome');b(0,0,0.08,1.2,0,4.5,'chrome');b(5.92,0,6,1.2,0,4.5,'chrome');for(var i=0;i<4;i++)b(0.6+i*1.3,0.5,1.5+i*1.3,0.56,2.6,4.4,i%2?'linen':'rugB');});
+plant(L,0.8,40.6,0.8);plant(L,8.6,43.2,0.8);
+frame(L,'v',31,2.4,0,1,4.4,6.0,'art2');
+})();
+
+/* ---------- FIRST FLOOR ---------- */
+(function(){var L=1;
+slab(L,-1,-5,13,24);slab(L,-1,24,9,33);slab(L,-1,33,13,38);
+wall(L,-1,-5,0,38);wall(L,12,-1,13,38);wall(L,12,-5,13,-1,0,3.4);
+// extension: washroom front wall with ventilator, balcony railing, partition
+win(L,'h',0,7,-5,-4.5,{off:2.4,w:2.2,sill:6,head:7.5});wall(L,6.83,-4.5,7.17,-1);balustrade(L,'h',7.17,12,-4.8);
+// row 0
+wall(L,0,-1,4,0);door(L,'h',4,7,-1,0,{w:2.5,off:0.4,sw:-1,hinge:'a2'});win(L,'h',7,9,-1,0,{curt:1});door(L,'h',9,12,-1,0,{w:2.75,sw:-1,hinge:'a2'});
+// row 21
+wall(L,0,20,9,21);door(L,'h',9,12,20,21,{w:2.75,sw:-1,hinge:'a2'});
+// col 9, row 30
+door(L,'v',21,24,8,9,{w:2.6,sw:-1,hinge:'a1'});wall(L,8,24,9,29);wall(L,6,29,9,30);
+// stair to second floor (as drawn: starts at column 7)
+flight(L,'x',6,9,30,33,0,4,2.5);landing(L,9,31.5,12,33,2.5);landing(L,9,30,12,31.5,3.125);flight(L,'y',30,24,9,12,3.125,11,10);
+ARROWS.push({L:1,pts:[[6.3,31.5],[10.5,31.5],[10.5,24.6]]});
+// rear washroom
+wall(L,5,32.83,12,33.17);door(L,'v',33,37,4.83,5.17,{w:2.4,off:0.5,sw:1,hinge:'a1'});
+// row 38
+wall(L,0,37,2,38);win(L,'h',2,5,37,38,{curt:-1});wall(L,5,37,12,38);
+floor(L,0,-4.5,6.83,-1,'tile');floor(L,7.17,-4.8,12,-1,'stone');floor(L,0,-1,12,21,'wood');floor(L,8,20,12,24,'marble');floor(L,0,21,8,29,'wood');floor(L,0,29,6,33,'wood');floor(L,0,33,5,37,'wood');floor(L,5.17,33.17,12,37,'tile');
+room(L,'Master Bedroom',0,0,12,20,"12′ × 20′",6.4,17.3);room(L,'Washroom',0,-5,7,-1,"7′ × 4′",3.5,-1.55);room(L,'Balcony',7,-5,12,-1,"5′ × 4′",9.6,-1.6);
+room(L,'2nd Bedroom',0,21,8,29,"8′ × 8′",5.1,28.6);room(L,'Stair lobby',9,21,12,24,"3′ × 3′",10.5,22.5);room(L,'Dressing lobby',2,29,6,33,"4′ × 4′",4,31.4);
+room(L,'Bay',2,33,5,37,"3′ × 4′",3.5,33.7);room(L,'Washroom',5,33,12,37,"7′ × 4′",8.6,33.75);
+// --- master bedroom
+rug(L,2.5,4.6,7,8.6,true);
+bed(L,0.1,5.9,3,6.2,6.8,'King bed','burgundy');nightstand(L,0.1,4.3,3);nightstand(L,0.1,12.2,3);
+piece(L,'Bench',7.1,7.2,0,1.4,3.6,function(b){b(0,0,1.4,3.6,1.0,1.5,'sage');legs(b,1.4,3.6,1.0);});
+tvUnit(L,10.6,6.2,1,5.6,'TV unit');
+wardrobe(L,0,13.9,3,6,'Wardrobe');
+dresser(L,10.6,13.2,1,3.2,'Dresser');
+desk(L,10,2.2,1,3.6,2,'Writing desk');chair(L,8.5,3.2,3,'sage');
+sofa(L,0.3,0.4,3,2.8,'Armchair','sage',2.6);C(L,3.6,1.1,0.7,2.0,2.1,'marbleTop');C(L,3.6,1.1,0.08,0,2.0,'brass');C(L,3.6,1.1,0.45,0,0.06,'brass');
+plant(L,0.8,3.6,0.7);chandelier(L,5.5,9,1.1);
+frame(L,'v',7.2,1.8,0,1,5,6.6,'art3');frame(L,'v',9.4,1.8,0,1,5,6.6,'art1');
+// --- front washroom
+shower(L,0.1,-4.45,0,2.8,3.4,'side');wc(L,3.1,-4.5,0);vanity(L,4.9,-4.5,0,1.7,'Basin');
+// --- balcony
+caneChair(L,7.4,-4.4,3);caneChair(L,7.4,-2.6,3);C(L,9.9,-3.4,0.7,1.7,1.8,'walnut');C(L,9.9,-3.4,0.1,0,1.7,'walnutD');planter(L,9.3,-4.6,11.9,-4.05);LABELS.push({L:1,t:'Cane chairs',x:8.6,y:-3.0});
+// --- 2nd bedroom
+rug(L,1.6,22,5.4,6.4);
+bed(L,0.1,22.7,3,5,6.3,'Queen bed','navy');nightstand(L,0.1,21.3,3,1.25);nightstand(L,0.1,27.8,3,1.2);
+B(L,7.75,24.6,7.95,27.6,3.6,5.5,'black',{np:false});LABELS.push({L:1,t:'Wall TV',x:7.2,y:26.1});
+wardrobe(L,0,29,3,8,'Wardrobes');
+desk(L,2.2,35.2,2,2.6,1.7,'Study desk');C(L,3.5,34.5,0.55,0,1.5,'navy');
+frame(L,'h',1.6,3,21,1,4.6,6.4,'art2');
+// --- rear washroom
+vanity(L,5.5,35.4,2,1.9,'Basin');wc(L,7.8,34.8,2);shower(L,9.8,33.2,0,2.2,3.8,'side');
+plant(L,11.3,21.6,0.6);
+})();
+
+/* ---------- SECOND FLOOR ---------- */
+(function(){var L=2;
+slab(L,-1,-5,13,24);slab(L,-1,24,9,33);slab(L,-1,33,13,38);
+B(3,-1,20,13,38,-0.5,0,'slab',{cat:'slab'});
+wall(L,-1,20,0,38);wall(L,12,20,13,38);wall(L,-1,-5,0,20,0,3.4);wall(L,12,-5,13,20,0,3.4);balustrade(L,'h',0,12,-4.8);
+wall(L,0,20,1,21);win(L,'h',1,4,20,21,{curt:1});wall(L,4,20,5,21);door(L,'h',5,8,20,21,{w:2.75,sw:1,hinge:'a1'});wall(L,8,20,9,21);door(L,'h',9,12,20,21,{w:2.75,sw:-1,hinge:'a2'});
+door(L,'v',21,24,8,9,{w:2.6,sw:-1,hinge:'a2'});wall(L,8,24,9,33);
+wall(L,0,32.83,5,33.17);wall(L,4,33,5,34);door(L,'v',34,37,4,5,{w:2.4,sw:-1,hinge:'a1'});
+balustrade(L,'h',9,12,33.15);
+wall(L,0,37,5,38);win(L,'h',5,10,37,38,{});wall(L,10,37,12,38);
+floor(L,0,-4.8,12,20,'deck');floor(L,8,20,12,24,'marble');floor(L,0,20.4,8,33,'wood');floor(L,0,33.17,4,37,'tile');floor(L,4,33,12,37,'tile2');
+room(L,'Open Terrace',0,-5,12,20,"12′ × 25′",6,10.2);room(L,'Office Room',0,21,8,29,"8′ × 8′",4.6,29.6);room(L,'Pantry',0,29,8,33,"8′ × 4′",6.8,30.6);
+room(L,'Toilet',0,33,4,37,"4′ × 4′",2.6,35.6);room(L,'Rear lobby',5,33,12,37,"7′ × 4′",8.5,34.6);room(L,'Stair landing',9,21,12,24,"3′ × 3′",10.5,22.5);
+// --- office
+rug(L,0.6,23.4,5.6,5.6,true);
+desk(L,0.7,24.9,2,4.8,2.4,'Executive desk');officeChair(L,3.1,28.3,2);chair(L,1.2,23.3,0,'sage');chair(L,3.3,23.3,0,'sage');
+consoleT(L,1.1,21,0,2.8,'Console');
+bookshelf(L,6.9,24.4,1,5.2,'Bookshelf');
+frame(L,'v',24.6,3.4,0,1,4.4,6.6,'art3');
+// --- pantry: counter with sink + induction, under-counter fridge
+counter(L,0,31,2,3.5,1.83,'Sink + hob',{sink:1.6,hob:-0.0+0.05,up:[[0,3.5]]});
+fridge(L,3.6,31.2,2,1.7,1.6,3.1,'Small fridge');
+piece(L,null,3.65,31.5,0,1.6,1.2,function(b){b(0,0,1.6,1.2,3.15,4.2,'black');b(0.1,-0.02,1.1,0,3.3,4.05,'steel');});
+B(L,3.6,32.0,5.3,32.83,5.0,7.4,'cab',{np:true});
+// --- toilet + lobby
+wc(L,0.3,34.8,2);piece(L,'Basin',0.15,33.2,3,1.0,1.2,function(b,c){b(0,0,1.0,1.1,2.4,2.75,'white');c(0.5,0.6,0.38,2.75,2.8,'tileD');b(0.45,0.05,0.55,0.25,2.75,3.2,'chrome');b(0.1,0,0.9,0.05,3.6,5.6,'mirror',{np:true});});
+piece(L,'Storage cabinets',5.4,35.8,2,4.6,1.2,function(b){b(0,0,4.6,1.2,0,2.6,'walnut');b(0,0,4.6,1.23,2.6,2.7,'marbleTop');for(var i=0;i<3;i++){b(i*1.53+0.06,1.2,(i+1)*1.53-0.06,1.23,0.2,2.5,'walnutD');b(i*1.53+0.7,1.23,i*1.53+0.8,1.27,1.2,1.6,'brass');}});
+plant(L,11.2,36.1,0.8);plant(L,5.6,34.0,0.6);
+// --- terrace: pergola, seating, swing, dining, planters
+[[0.1,-4.4],[11.5,-4.4],[0.1,3.4],[11.5,3.4]].forEach(function(q){B(L,q[0],q[1],q[0]+0.4,q[1]+0.4,0,8.6,'walnut');});
+B(L,0,-4.5,12,-4.1,8.6,9.1,'walnut',{np:true});B(L,0,3.3,12,3.7,8.6,9.1,'walnut',{np:true});for(var x=0.4;x<11.8;x+=1.25)B(L,x,-4.9,x+0.25,4.1,9.1,9.4,'teak',{np:true});
+DASH.push({L:2,r:[0,-4.9,12,4.1]});LABELS.push({L:2,t:'Pergola over',x:6,y:3.0});
+sofa(L,0.6,-1.4,3,4.6,'Outdoor sofa','sage',2.6);caneChair(L,8.6,-0.6,1);caneChair(L,8.6,1.4,1);
+piece(L,null,4.6,-0.4,0,2.4,3,function(b){b(0,0,2.4,3,1.1,1.25,'teak');legs(b,2.4,3,1.1,'teak');});
+planter(L,0.6,-4.5,11.4,-3.9);
+piece(L,'Swing (jhula)',1,6.5,0,5.4,2.4,function(b){b(0,0.9,0.3,1.5,0,7,'walnut');b(5.1,0.9,5.4,1.5,0,7,'walnut');b(0,1.0,5.4,1.4,7,7.35,'walnut');b(0.7,0.4,4.7,2.0,1.4,1.6,'teak');b(0.7,0.4,4.7,0.6,1.6,3.0,'teak');b(0.9,0.6,4.5,1.9,1.6,1.8,'burgundy');
+  [[0.8,0.5],[4.6,0.5],[0.8,1.9],[4.6,1.9]].forEach(function(q){b(q[0]-0.03,q[1]-0.03,q[0]+0.03,q[1]+0.03,1.6,7,'brass',{np:true});});});
+C(L,5.8,14.2,1.8,2.35,2.5,'teak');C(L,5.8,14.2,0.2,0,2.35,'walnutD');C(L,5.8,14.2,0.9,0,0.08,'walnutD');LABELS.push({L:2,t:'Outdoor dining',x:5.8,y:14.2});
+caneChair(L,4.9,10.9,0);caneChair(L,4.9,15.9,2);caneChair(L,2.3,13.3,3);caneChair(L,7.6,13.3,1);
+planter(L,0.2,9.5,0.9,19.6);planter(L,11.1,5,11.8,16.5);
+})();
+
+/* ================= 2D PLANS ================= */
+var FCOL={marble:'#f3efe6',wood:'#ecdcc0',tile:'#dfeaec',tile2:'#e9e6dd',stone:'#e1dfd6',deck:'#e9dcc6'};
+var FNAME=['Ground Floor','First Floor','Second Floor'];
+function tint(hex,t){var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;r=Math.round(r+(255-r)*t);g=Math.round(g+(255-g)*t);b=Math.round(b+(255-b)*t);return 'rgb('+r+','+g+','+b+')';}
+function f2(v){return Math.round(v*100)/100;}
+function planSVG(L,o){o=o||{};var s=[],y0=-6.6,h=53.6;
+  var vb=o.mini?'-1.4 -5.4 14.8 50.8':'-2.6 '+y0+' 17.2 '+h;
+  s.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" role="img" aria-label="'+FNAME[L]+' plan">');
+  function R(x1,y1,x2,y2,fill,st,sw,ex){return '<rect x="'+f2(x1)+'" y="'+f2(y1)+'" width="'+f2(x2-x1)+'" height="'+f2(y2-y1)+'" fill="'+fill+'"'+(st?' stroke="'+st+'" stroke-width="'+(sw||0.04)+'"':'')+(ex||'')+'/>';}
+  SLABS[L].forEach(function(r){s.push(R(Math.max(r[0],-1),r[1],Math.min(r[2],13),r[3],'#ffffff'));});
+  if(L>0)s.push(R(9,24,12,33,'#f1f1ee'));
+  FLOORS.forEach(function(f){if(f.L===L)s.push(R(f.x1,f.y1,f.x2,f.y2,FCOL[f.t]));});
+  function prim(p,stair){var fill=stair?(p.m==='tread'?'#fbfaf6':'#fbfaf6'):tint(MAT[p.m]||'#999',p.cat==='rug'?0.55:0.42),st=stair?'#6b7178':'#3c4248',op=(p.m==='glass')?' fill-opacity="0.35"':'';
+    if(p.k==='b')return R(p.x1,p.y1,p.x2,p.y2,fill,st,0.035,op);
+    return '<circle cx="'+f2(p.cx)+'" cy="'+f2(p.cy)+'" r="'+f2(p.r)+'" fill="'+fill+'" stroke="'+st+'" stroke-width="0.035"/>';}
+  if(L>0)P.forEach(function(p){if(p.L===L-1&&p.cat==='stair'&&p.m==='tread'&&p.x1>=9)s.push(prim(p,true));});
+  if(!o.mini){var fs=P.filter(function(p){return p.L===L&&(p.cat==='furn'||p.cat==='rug'||p.cat==='glass'&&p.z0>0.1&&p.z1<7&&false)&&!p.np&&p.z0<6.4;});
+    fs.sort(function(a,b){return (a.cat==='rug'?-10:0)+a.z1-((b.cat==='rug'?-10:0)+b.z1);});fs.forEach(function(p){s.push(prim(p));});}
+  P.forEach(function(p){if(p.L===L&&p.cat==='stair'&&p.m==='tread')s.push(prim(p,true));});
+  P.forEach(function(p){if(p.L===L&&p.cat==='wall'&&p.k==='b'){if(p.z1>6)s.push(R(p.x1,p.y1,p.x2,p.y2,'#2b3138'));}});
+  P.forEach(function(p){if(p.L===L&&p.cat==='wall'&&p.k==='b'&&p.z1<=6)s.push(R(p.x1,p.y1,p.x2,p.y2,'#c8ccd0','#2b3138',0.04));});
+  WINS.forEach(function(w){if(w.L!==L)return;var a=w.ax==='h';s.push(a?R(w.oa,w.t1,w.ob,w.t2,'#bcd9e2','#2b3138',0.05):R(w.t1,w.oa,w.t2,w.ob,'#bcd9e2','#2b3138',0.05));
+    var tm=(w.t1+w.t2)/2;s.push(a?'<line x1="'+w.oa+'" y1="'+tm+'" x2="'+w.ob+'" y2="'+tm+'" stroke="#2b3138" stroke-width="0.05"/>':'<line x1="'+tm+'" y1="'+w.oa+'" x2="'+tm+'" y2="'+w.ob+'" stroke="#2b3138" stroke-width="0.05"/>');});
+  DOORS.forEach(function(d){if(d.L!==L)return;var a=d.ax==='h';
+    if(d.slider){s.push(R(d.oa,d.t1,d.ob,d.t2,'#ffffff'));s.push('<line x1="1.5" y1="20.5" x2="4.5" y2="20.5" stroke="#3b8fa8" stroke-width="0.12"/><path d="M2.6 19.4 L0.6 19.4 M0.6 19.4 l0.4 -0.25 M0.6 19.4 l0.4 0.25" stroke="#2b3138" stroke-width="0.05" fill="none"/>');return;}
+    function leaf(hA,len,dir){var te=d.sw>0?d.t2:d.t1,pts=[];for(var i=0;i<=8;i++){var th=i/8*Math.PI/2,da=Math.sin(th)*dir*len,dt=Math.cos(th)*d.sw*len;pts.push(a?[hA+da,te+dt]:[te+dt,hA+da]);}
+      var H=a?[hA,te]:[te,hA];return '<path d="M'+f2(H[0])+' '+f2(H[1])+' L'+pts.map(function(q){return f2(q[0])+' '+f2(q[1]);}).join(' L')+'" fill="none" stroke="#2b3138" stroke-width="0.05"/><line x1="'+f2(H[0])+'" y1="'+f2(H[1])+'" x2="'+f2(pts[0][0])+'" y2="'+f2(pts[0][1])+'" stroke="#2b3138" stroke-width="0.1"/>';}
+    s.push(a?R(d.oa,d.t1,d.ob,d.t2,'#ffffff','#2b3138',0.03):R(d.t1,d.oa,d.t2,d.ob,'#ffffff','#2b3138',0.03));
+    if(!o.mini){if(d.dbl){s.push(leaf(d.oa,d.w/2,1));s.push(leaf(d.ob,d.w/2,-1));}else if(d.hinge==='a1')s.push(leaf(d.oa,d.w,1));else s.push(leaf(d.ob,d.w,-1));}});
+  DASH.forEach(function(d){if(d.L===L)s.push(R(d.r[0],d.r[1],d.r[2],d.r[3],'none','#2b3138',0.05,' stroke-dasharray="0.3 0.2"'));});
+  ARROWS.forEach(function(a){if(a.L!==L)return;var p=a.pts,e=p[p.length-1],q=p[p.length-2],dx=e[0]-q[0],dy=e[1]-q[1],n=Math.sqrt(dx*dx+dy*dy);dx/=n;dy/=n;
+    s.push('<path d="M'+p.map(function(v){return v[0]+' '+v[1];}).join(' L')+'" fill="none" stroke="#175f73" stroke-width="0.09"/><path d="M'+e[0]+' '+e[1]+' L'+f2(e[0]-dx*0.6-dy*0.3)+' '+f2(e[1]-dy*0.6+dx*0.3)+' L'+f2(e[0]-dx*0.6+dy*0.3)+' '+f2(e[1]-dy*0.6-dx*0.3)+' Z" fill="#175f73"/>');
+    if(!o.mini)s.push('<text x="'+(p[0][0]+2.4)+'" y="'+(p[0][1]-0.5)+'" font-size="0.48" font-family="IBM Plex Mono,monospace" fill="#175f73" text-anchor="middle">UP</text>');});
+  if(o.mini){s.push('<circle id="mm-dot" cx="6" cy="0" r="0.8" fill="#d13b2e" stroke="#fff" stroke-width="0.2"/><line id="mm-dir" x1="6" y1="0" x2="6" y2="2" stroke="#d13b2e" stroke-width="0.35"/></svg>');return s.join('');}
+  var T='font-family="Barlow Condensed,Arial Narrow,sans-serif" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-linejoin="round"';
+  if(o.grid){var ya=L===0?0:-5,yb=L===0?44:38;for(var x=0;x<=12;x++)s.push('<line x1="'+x+'" y1="'+ya+'" x2="'+x+'" y2="'+yb+'" stroke="#175f73" stroke-opacity="0.28" stroke-width="0.025"/>');
+    for(var y=ya;y<=yb;y++)s.push('<line x1="0" y1="'+y+'" x2="12" y2="'+y+'" stroke="#175f73" stroke-opacity="0.28" stroke-width="0.025"/>');
+    for(var r=1;r<=yb;r++)s.push('<text x="-1.7" y="'+(r-0.33)+'" font-size="0.42" font-family="IBM Plex Mono,monospace" fill="#586470" text-anchor="middle">'+r+'</text>');
+    for(var c=1;c<=12;c++)s.push('<text x="'+(c-0.5)+'" y="'+(L===0?-1.3:-5.3)+'" font-size="0.42" font-family="IBM Plex Mono,monospace" fill="#586470" text-anchor="middle">'+c+'</text>');}
+  if(o.labels)LABELS.forEach(function(l){if(l.L===L)s.push('<text x="'+f2(l.x)+'" y="'+f2(l.y+0.13)+'" font-size="0.4" font-weight="500" stroke-width="0.14" fill="#3a2a1c" '+T+'>'+l.t+'</text>');});
+  ROOMS.forEach(function(r){if(r.L!==L)return;var small=(r.x2-r.x1)<5||(r.y2-r.y1)<5,fs=small?0.52:0.95;
+    s.push('<text x="'+r.lx+'" y="'+r.ly+'" font-size="'+fs+'" font-weight="700" stroke-width="'+(small?0.16:0.22)+'" fill="#1b2530" '+T+'>'+r.name.toUpperCase()+'</text>');
+    s.push('<text x="'+r.lx+'" y="'+(r.ly+(small?0.55:0.8))+'" font-size="'+(small?0.38:0.5)+'" stroke-width="0.14" fill="#586470" font-family="IBM Plex Mono,monospace" text-anchor="middle" paint-order="stroke" stroke="#ffffff">'+r.dim+'</text>');});
+  // road + overall dims
+  var top=L===0?0:-5;
+  s.push('<text x="6" y="-5.75" font-size="0.6" font-weight="600" fill="#586470" font-family="Barlow Condensed,Arial Narrow,sans-serif" text-anchor="middle" letter-spacing="0.2">ROAD SIDE (FRONT)</text>');
+  var bot=L===0?45:38;s.push('<line x1="0" y1="'+(bot+0.7)+'" x2="12" y2="'+(bot+0.7)+'" stroke="#586470" stroke-width="0.04"/><line x1="0" y1="'+(bot+0.45)+'" x2="0" y2="'+(bot+0.95)+'" stroke="#586470" stroke-width="0.04"/><line x1="12" y1="'+(bot+0.45)+'" x2="12" y2="'+(bot+0.95)+'" stroke="#586470" stroke-width="0.04"/>');
+  s.push('<text x="6" y="'+(bot+1.45)+'" font-size="0.5" fill="#586470" font-family="IBM Plex Mono,monospace" text-anchor="middle">12′ clear width</text>');
+  var d1=top,d2=L===0?44:38;s.push('<line x1="13.7" y1="'+d1+'" x2="13.7" y2="'+d2+'" stroke="#586470" stroke-width="0.04"/><line x1="13.45" y1="'+d1+'" x2="13.95" y2="'+d1+'" stroke="#586470" stroke-width="0.04"/><line x1="13.45" y1="'+d2+'" x2="13.95" y2="'+d2+'" stroke="#586470" stroke-width="0.04"/>');
+  s.push('<text transform="translate(14.35 '+((d1+d2)/2)+') rotate(90)" font-size="0.5" fill="#586470" font-family="IBM Plex Mono,monospace" text-anchor="middle">'+(d2-d1)+'′'+(L===0?' incl. wash yard':' incl. 4′ extension')+'</text>');
+  s.push('</svg>');return s.join('');}
+
+var SCHED=[
+ [['Main Hall',['3-seat sofa and loveseat in an L, marble-top centre table, bordered rug','Walnut TV unit with side shelves in the wall niche','6-seat dining table, crockery unit on the kitchen wall','Marble and walnut temple in its niche','Entry console with mirror, two chandeliers, plants, framed art']],
+  ['Kitchen',['Serving table with 4 bar stools and wall cabinets','7′ platform with hob and chimney at the front end, water purifier on the wall','Fridge and sink counter on the rear wall']],
+  ['Washroom',['Basin with mirror near the door, WC in the middle, glass-screened shower at the right']],
+  ['Wash Yard',['Undertop washbasin and wash counter','Washing machine, water tank, drying rack, plants']]],
+ [['Master Bedroom',['King bed with upholstered headboard, two nightstands with lamps, foot bench','6′ wardrobe, dresser with mirror, TV unit','Writing desk and chair, reading armchair with side table','Rug, chandelier, curtains, framed art']],
+  ['Washroom (front)',['Shower at the far end, WC, basin with mirror, high ventilator']],
+  ['Balcony',['Two cane chairs with a round table, planter along the railing']],
+  ['2nd Bedroom',['Queen bed, two nightstands, wall-mounted TV, rug','8′ run of wardrobes, study desk at the rear window']],
+  ['Washroom (rear)',['Basin, WC and shower']]],
+ [['Office Room',['Executive desk with chair and two visitor chairs','Full-height bookshelf, console under the window, rug']],
+  ['Pantry',['Counter with sink and 2-zone induction hob, wall cabinets','Under-counter small fridge with a microwave above']],
+  ['Toilet and rear lobby',['WC and wall basin','Storage cabinets under the rear window, plants']],
+  ['Open Terrace',['Timber pergola with outdoor sofa, two cane chairs and a low table','Swing (jhula), round outdoor dining table for four','Planters along the front and both sides']]]
+];
+var planState={f:'all',grid:false};
+function renderPlans(){var el=document.getElementById('plans'),h='';
+  if(planState.f==='all'){el.className='plans';for(var L=0;L<3;L++)h+='<div class="card"><h3>'+FNAME[L]+'<span>'+(L===0?'12′ × 44′':'12′ × 38′ + 5′ front')+'</span></h3><div class="drawing">'+planSVG(L,{grid:planState.grid})+'</div></div>';}
+  else{var F=+planState.f;el.className='plans single';h='<div class="card"><h3>'+FNAME[F]+'<span>furniture shown</span></h3><div class="drawing">'+planSVG(F,{grid:planState.grid,labels:true})+'</div></div><div class="card sched"><h3>Furniture list</h3>'+SCHED[F].map(function(r){return '<h4>'+r[0]+'</h4><ul>'+r[1].map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';}).join('')+'</div>';}
+  el.innerHTML=h;}
+document.getElementById('floorSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;planState.f=b.dataset.f;[].forEach.call(this.children,function(c){c.setAttribute('aria-pressed',c===b);});renderPlans();});
+document.getElementById('gridChk').addEventListener('change',function(){planState.grid=this.checked;renderPlans();});
+renderPlans();
+
+/* ================= ELEVATIONS ================= */
+(function(){var SC=20,ZT=35;
+function r(x1,z1,x2,z2,fill,ex){return '<rect x="'+f2(x1*SC)+'" y="'+f2((ZT-z2)*SC)+'" width="'+f2((x2-x1)*SC)+'" height="'+f2((z2-z1)*SC)+'" fill="'+fill+'"'+(ex||'')+'/>';}
+function ln(x1,z1,x2,z2,st,w,ex){return '<line x1="'+f2(x1*SC)+'" y1="'+f2((ZT-z1)*SC)+'" x2="'+f2(x2*SC)+'" y2="'+f2((ZT-z2)*SC)+'" stroke="'+st+'" stroke-width="'+(w||1)+'"'+(ex||'')+'/>';}
+function vl(x1,x2,z1,z2,step,st,w){var s='';for(var x=x1;x<=x2+0.001;x+=step)s+=ln(x,z1,x,z2,st,w);return s;}
+function hl(x1,x2,z1,z2,step,st,w){var s='';for(var z=z1;z<=z2+0.001;z+=step)s+=ln(x1,z,x2,z,st,w);return s;}
+function pipe(){return ln(13.35,19.2,13.35,0,'#2a7fc0',2,' stroke-dasharray="5 4"')+ln(9,19.2,13.35,19.2,'#2a7fc0',2,' stroke-dasharray="5 4"');}
+function back(c){return r(0,20,14,30,c)+r(0,29.5,14,30,'#00000022')+r(1,20,5,27.5,'#00000030')+r(6,22.5,9,27.5,'#9fcbd688');}
+function ground(){return r(-1,-2,15,0,'#b9b5a8')+ln(-1,0,15,0,'#2b3138',1.5);}
+var opts=[
+{name:'A. Sand Frame',tag:'Builds on the reference you picked earlier',
+ text:'A sand-coloured box frame wraps the first-floor extension, with a warm LED cove line inside it. The washroom face is fluted walnut-finish panels with one slim glass slit. Travertine cladding and a fluted wooden door mark the entrance.',
+ pipes:'Inside the thick right leg of the frame, which continues to the ground as a travertine pier',mat:'Sand texture paint, fluted WPC or teak panels, travertine tiles, glass railing with brass handrail',cost:'₹₹',
+ draw:function(){var s=ground()+back('#e7e0d2');
+  s+=r(0,0,14,9.5,'#d9d0bf')+r(0,0,6,9.5,'#cdbf9f')+hl(0,6,1.2,9,1.2,'#b8a988',0.8)+r(12.7,0,14,9.5,'#cdbf9f')+hl(12.7,14,1.2,9,1.2,'#b8a988',0.8);
+  s+=r(1,0,5,7.5,'#6a472c')+vl(1.15,4.9,0,7.5,0.22,'#3f2819',1)+ln(3,0,3,7.5,'#2a1a10',2)+r(2.8,3,2.9,4.6,'#c9a24a')+r(3.1,3,3.2,4.6,'#c9a24a')+r(1,7.5,5,8.3,'#9fcbd6');
+  s+=r(6.4,2.5,12.2,7.5,'#3b3f42')+r(6.55,2.65,12.05,7.35,'#9fcbd6')+vl(8.4,10.3,2.65,7.35,1.85,'#3b3f42',2);
+  s+=r(-0.2,9.4,14.2,10.2,'#c9b48a')+r(-0.2,19.3,14.2,20.1,'#c9b48a')+r(-0.2,10.2,0.6,19.3,'#c9b48a')+r(12.7,10.2,14.2,19.3,'#c9b48a');
+  s+=r(0.6,10.2,12.7,19.3,'#f1ebdd')+r(0.6,10.2,6,19.3,'#4a4d50')+r(1,10.2,4,17.2,'#2b2e31')+r(4.2,12.7,5.9,17.5,'#7fa9b5');
+  s+=r(6,10.2,12.7,19.3,'#7a5335')+vl(6.15,12.6,10.2,19.3,0.25,'#4a2f1c',1.2)+r(9,12.5,9.5,18,'#2b2e31')+r(9.08,12.6,9.42,17.9,'#9fcbd6');
+  s+=ln(0.65,19.25,12.65,19.25,'#ffd97a',3)+ln(0.65,10.25,12.65,10.25,'#ffd97a',2);
+  s+=r(0.6,10.2,6,13.6,'#bfe0e8',' fill-opacity="0.45" stroke="#6b8d97" stroke-width="1"')+ln(0.6,13.65,6,13.65,'#c9a24a',3);
+  s+=r(-0.2,20.1,14.2,23.4,'#ece5d6')+r(-0.2,23.4,14.2,23.8,'#c9b48a')+r(0.2,23.8,0.7,29,'#c9b48a')+r(13.3,23.8,13.8,29,'#c9b48a')+r(-0.2,29,14.2,29.7,'#c9b48a')+ln(0.7,28.95,13.3,28.95,'#ffd97a',2);
+  return s+pipe();}},
+{name:'B. Classic Cornice',tag:'Matches the classic interior',
+ text:'An ivory, symmetrical colonial face with moulded cornices at every floor, slim pilasters at both edges, turned balusters on the balcony and terrace, and sage-green louvred shutters across the washroom.',
+ pipes:'Inside the right pilaster, which is built hollow from the washroom to the ground with an access door at each floor',mat:'Ivory texture paint, GRC cornices and balusters, teak panelled door, aluminium louvres in sage green',cost:'₹₹',
+ draw:function(){var s=ground()+back('#ede8dc');var iv='#f4efe2',mo='#fffdf6',sh='#d8d0bd';
+  s+=r(0,0,14,9.5,'#e6dfcd')+r(0,0,14,1.2,'#bdb5a2');
+  s+=r(1,0,5,7.2,'#5b3a24');[1.2,3.1].forEach(function(x){s+=r(x,0.5,x+1.7,3,'#6f4a2f')+r(x,3.4,x+1.7,6.8,'#6f4a2f')+r(x+0.25,3.7,x+1.45,6.5,'#5b3a24');});s+=r(0.8,7.2,5.2,7.6,mo)+r(1,7.6,5,8.6,'#9fcbd6')+vl(2,4,7.6,8.6,1,'#fffdf6',2)+r(0.7,8.6,5.3,8.95,mo);
+  s+=r(6.6,2.5,12,7.6,mo)+r(6.8,2.7,11.8,7.4,'#9fcbd6')+vl(8.05,10.55,2.7,7.4,1.25,mo,2.5)+hl(6.8,11.8,4.27,5.84,1.57,mo,2.5)+r(6.4,2.2,12.2,2.5,mo)+r(6.4,7.6,12.2,7.95,mo);
+  function cornice(z){return r(-0.35,z,14.35,z+0.25,mo,' stroke="#bdb5a2" stroke-width="0.6"')+r(-0.2,z-0.3,14.2,z,sh)+r(-0.1,z-0.55,14.1,z-0.3,mo)+vl(0.2,13.8,z-0.52,z-0.33,0.4,'#bdb5a2',2);}
+  s+=r(0,10,14,19.5,iv)+r(1,10,6,19.5,'#5a5d5f')+r(1.3,10,4,17,'#3a2a1e')+r(4.3,12.5,5.8,17.3,'#8db5c0');
+  s+=r(6.6,11.5,12.4,18.3,mo);[6.8,8.7,10.6].forEach(function(x){s+=r(x,11.7,x+1.6,18.1,'#73856a')+hl(x+0.1,x+1.5,11.9,17.9,0.28,'#55664e',1.2);});s+=r(6.4,18.3,12.6,18.65,mo)+r(6.4,11.15,12.6,11.5,mo);
+  s+=r(1,10,6,10.35,mo);for(var x=1.25;x<5.9;x+=0.42)s+='<ellipse cx="'+(x*SC)+'" cy="'+((ZT-11.8)*SC)+'" rx="2.6" ry="26" fill="'+mo+'" stroke="#bdb5a2" stroke-width="0.5"/>';s+=r(1,13.2,6,13.55,mo,' stroke="#bdb5a2" stroke-width="0.5"');
+  s+=r(0,0,1,23.6,mo,' stroke="#cfc7b3" stroke-width="0.8"')+r(13,0,14,23.6,mo,' stroke="#cfc7b3" stroke-width="0.8"')+vl(0.25,0.75,1.2,23,0.25,'#d8d0bd',1)+vl(13.25,13.75,1.2,23,0.25,'#d8d0bd',1);
+  s+=cornice(9.9)+cornice(19.9);
+  s+=r(1,20.15,13,20.5,mo);for(var x2=1.25;x2<12.9;x2+=0.42)s+='<ellipse cx="'+(x2*SC)+'" cy="'+((ZT-21.9)*SC)+'" rx="2.6" ry="26" fill="'+mo+'" stroke="#bdb5a2" stroke-width="0.5"/>';s+=r(-0.2,23.25,14.2,23.65,mo,' stroke="#bdb5a2" stroke-width="0.6"');
+  [0.5,13.5].forEach(function(x){s+='<circle cx="'+(x*SC)+'" cy="'+((ZT-24.2)*SC)+'" r="7" fill="'+mo+'" stroke="#bdb5a2" stroke-width="0.6"/>';});
+  s+=r(1.2,23.65,1.6,28.6,'#fffdf6')+r(12.4,23.65,12.8,28.6,'#fffdf6')+r(0.8,28.6,13.2,29.1,mo,' stroke="#bdb5a2" stroke-width="0.6"')+vl(1.2,12.8,29.1,29.4,0.8,'#cfc7b3',5);
+  return s+pipe();}},
+{name:'C. Timber Haveli',tag:'Warm, rooted in Gujarat',
+ text:'Lime-white walls with teak joinery in the manner of an old Ahmedabad pol house, kept straight-lined. A timber-framed balcony sits on carved brackets under a clay-tile sunshade, and a square teak lattice covers the washroom.',
+ pipes:'Behind the teak lattice, then down a stone-clad pier at the right edge',mat:'Lime-finish paint, teak or teak-finish aluminium, Mangalore clay tiles, Dhrangadhra stone plinth, brass studs',cost:'₹₹₹',
+ draw:function(){var s=ground()+back('#efeadf');var lw='#f5f1e6',tk='#7d5230',td='#553520';
+  s+=r(0,0,14,9.5,'#e9e3d3')+r(0,0,14,1.5,'#b8a888')+hl(0,14,0.5,1,0.5,'#9c8d70',0.7)+r(12.8,0,14,9.5,'#c8b996')+hl(12.8,14,1.5,9,1,'#a9997a',0.7);
+  s+=r(0.8,0,5.2,7.9,td)+r(1,0,5,7.5,tk)+ln(3,0,3,7.5,td,2.5);for(var z=1;z<7.2;z+=1.25)for(var x=1.4;x<5;x+=0.8)if(Math.abs(x-3)>0.25)s+='<circle cx="'+(x*SC)+'" cy="'+((ZT-z)*SC)+'" r="2.2" fill="#c9a24a"/>';s+=r(0.6,7.9,5.4,8.3,td);
+  s+=r(6.4,2.5,12.2,7.6,td)+r(6.6,2.7,12,7.4,'#9fcbd6')+vl(7.95,10.65,2.7,7.4,1.35,td,3)+ln(6.6,5.8,12,5.8,td,3);
+  for(var bx=0.3;bx<14;bx+=1.9)s+='<path d="M'+(bx*SC)+' '+((ZT-9.5)*SC)+' l0 '+(1.6*SC)+' l'+(1.1*SC)+' '+(-1.6*SC)+' Z" fill="'+td+'"/>';
+  s+=r(-0.2,9.5,14.2,10.1,td);
+  s+=r(0,10.1,14,19,lw)+r(0.6,10.1,6,19,'#5b5d5c')+r(1.2,10.1,4,17,'#3a2416')+r(4.3,12.6,5.8,17.2,'#8db5c0');
+  s+=r(6.3,11.2,12.7,18.2,td)+r(6.5,11.4,12.5,18,'#a97a4c');s+=vl(6.5,12.5,11.4,18,0.5,td,2)+hl(6.5,12.5,11.4,18,0.5,td,2);s+=r(8.9,15,10.1,17,'#9fcbd6',' stroke="'+td+'" stroke-width="3"');
+  s+=r(0.6,10.1,0.9,19,tk)+r(5.7,10.1,6,19,tk)+r(3.15,10.1,3.4,13.4,tk)+r(0.6,13.4,6,13.7,td)+vl(1.1,5.6,10.3,13.4,0.36,tk,2.5)+r(0.6,10.1,6,10.4,td);
+  s+='<path d="M'+(-0.6*SC)+' '+((ZT-19)*SC)+' L'+(14.6*SC)+' '+((ZT-19)*SC)+' L'+(14*SC)+' '+((ZT-20.4)*SC)+' L0 '+((ZT-20.4)*SC)+' Z" fill="#b5653f"/>'+vl(-0.2,14.2,19.05,19.9,0.4,'#8d4a2b',1);
+  s+=r(-0.1,20.4,14.1,23.6,lw)+r(-0.2,23.6,14.2,24,td)+vl(1,13,20.8,23.3,1.5,'#d9d2c0',10);
+  s+=r(0.4,24,0.8,28.6,tk)+r(13.2,24,13.6,28.6,tk)+r(6.8,24,7.2,28.6,tk)+r(0,28.6,14,29.1,td)+vl(0.3,13.7,29.1,29.5,0.7,tk,5);
+  return s+pipe();}}
+];
+document.getElementById('elevs').innerHTML=opts.map(function(o){return '<div class="card"><h3>'+o.name+'<span>'+o.cost+'</span></h3><div class="drawing"><svg viewBox="-24 80 328 660" role="img" aria-label="Front elevation '+o.name+'">'+o.draw()+'</svg></div><p><b>'+o.tag+'.</b> '+o.text+'</p><dl><dt>Pipes</dt><dd>'+o.pipes+'</dd><dt>Materials</dt><dd>'+o.mat+'</dd></dl></div>';}).join('');
+})();
+
+/* ================= ROUTER ================= */
+var VIEWS=['plans','walkthrough','elevations','notes'],three=null;
+function show(v){if(VIEWS.indexOf(v)<0)v='plans';VIEWS.forEach(function(n){document.getElementById('v-'+n).hidden=(n!==v);});
+  [].forEach.call(document.querySelectorAll('nav button'),function(b){b.setAttribute('aria-selected',b.dataset.v===v);});
+  if(v==='walkthrough'){if(!three)three=init3D();if(three)three.start();}else if(three)three.stop();}
+[].forEach.call(document.querySelectorAll('nav button'),function(b){b.addEventListener('click',function(){try{location.hash=b.dataset.v;}catch(e){}show(b.dataset.v);});});
+window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
+
+/* ================= 3D ================= */
+function init3D(){
+  var stage=document.getElementById('stage'),canvas=document.getElementById('c3d'),hud=document.getElementById('hud'),help=document.getElementById('help');
+  if(!window.THREE){stage.innerHTML='<p class="err">The 3D library could not load. Check your internet connection and reopen this tab.</p>';return null;}
+  var renderer;try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});}catch(e){stage.innerHTML='<p class="err">This browser could not start WebGL, so the 3D model cannot be shown here. The floor plans and elevations still work.</p>';return null;}
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setClearColor(0xcfe1ea);
+  var scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(62,16/9,0.15,600);
+  scene.add(new THREE.AmbientLight(0xffffff,0.40));scene.add(new THREE.HemisphereLight(0xffffff,0x8a7c66,0.22));
+  var dl=new THREE.DirectionalLight(0xfff4e0,0.42);dl.position.set(-30,60,-40);scene.add(dl);
+  var dl2=new THREE.DirectionalLight(0xe8f0ff,0.14);dl2.position.set(40,30,50);scene.add(dl2);
+  var head=new THREE.PointLight(0xffe2b0,0.0,38,1.6);scene.add(head);
+  // ground + road
+  var g=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.MeshLambertMaterial({color:0x8e9684}));g.rotation.x=-Math.PI/2;g.position.set(6,-0.31,20);scene.add(g);
+  var rd=new THREE.Mesh(new THREE.PlaneGeometry(400,14),new THREE.MeshLambertMaterial({color:0x62666a}));rd.rotation.x=-Math.PI/2;rd.position.set(6,-0.29,-18);scene.add(rd);
+  // instanced primitives
+  var mats={},groups={};
+  function mat(m){if(!mats[m]){var o={color:new THREE.Color(MAT[m]||'#999')};if(m==='glass'){o.transparent=true;o.opacity=0.32;o.depthWrite=false;}if(m==='glow'){o.emissive=new THREE.Color('#ffd98a');}if(m==='shade'){o.emissive=new THREE.Color('#6b5626');}mats[m]=new THREE.MeshLambertMaterial(o);}return mats[m];}
+  P.forEach(function(p){var k=p.k+'|'+p.m;(groups[k]=groups[k]||[]).push(p);});
+  var geo={b:new THREE.BoxGeometry(1,1,1),c:new THREE.CylinderGeometry(1,1,1,18),s:new THREE.SphereGeometry(1,14,10)},M=new THREE.Matrix4(),Q=new THREE.Quaternion(),V=new THREE.Vector3(),SV=new THREE.Vector3();
+  Object.keys(groups).forEach(function(k){var arr=groups[k],kind=k.split('|')[0],m=k.split('|')[1],im=new THREE.InstancedMesh(geo[kind],mat(m),arr.length);
+    arr.forEach(function(p,i){var z0=p.L*FH+p.z0,z1=p.L*FH+p.z1;
+      if(kind==='b'){V.set((p.x1+p.x2)/2,(z0+z1)/2,(p.y1+p.y2)/2);SV.set(Math.max(p.x2-p.x1,0.01),Math.max(z1-z0,0.01),Math.max(p.y2-p.y1,0.01));}
+      else if(kind==='c'){V.set(p.cx,(z0+z1)/2,p.cy);SV.set(p.r,z1-z0,p.r);}else{V.set(p.cx,(z0+z1)/2,p.cy);SV.set(p.r,p.r,p.r);}
+      M.compose(V,Q,SV);im.setMatrixAt(i,M);});
+    im.instanceMatrix.needsUpdate=true;im.frustumCulled=false;if(m==='glass')im.renderOrder=5;scene.add(im);});
+  // floor finishes with canvas textures
+  function tex(kind){var c=document.createElement('canvas');c.width=c.height=256;var x=c.getContext('2d'),sd=7;function rnd(){sd=(sd*16807)%2147483647;return sd/2147483647;}
+    if(kind==='marble'){x.fillStyle='#f1ebde';x.fillRect(0,0,256,256);x.strokeStyle='rgba(150,140,125,.35)';x.lineWidth=1.2;for(var i=0;i<14;i++){x.beginPath();var px=rnd()*256,py=rnd()*256;x.moveTo(px,py);for(var j=0;j<4;j++){px+=(rnd()-0.5)*90;py+=(rnd()-0.3)*70;x.lineTo(px,py);}x.stroke();}x.strokeStyle='#cfc6b2';x.lineWidth=2;x.strokeRect(0,0,128,128);x.strokeRect(128,0,128,128);x.strokeRect(0,128,128,128);x.strokeRect(128,128,128,128);}
+    else if(kind==='wood'){for(var r=0;r<8;r++){var b=150+Math.floor(rnd()*30);x.fillStyle='rgb('+(b+28)+','+(b-18)+','+(b-70)+')';x.fillRect(0,r*32,256,32);x.fillStyle='rgba(70,40,15,.5)';x.fillRect(0,r*32,256,1.5);x.fillRect(Math.floor(rnd()*256),r*32,1.5,32);}}
+    else if(kind==='tile'){for(var a=0;a<4;a++)for(var d=0;d<4;d++){x.fillStyle=(a+d)%2?'#e9eff0':'#cfdcdf';x.fillRect(a*64,d*64,64,64);}x.strokeStyle='#b3c0c3';for(var e=0;e<=4;e++){x.strokeRect(e*64,0,0.5,256);x.strokeRect(0,e*64,256,0.5);}}
+    else if(kind==='tile2'){x.fillStyle='#e6e1d5';x.fillRect(0,0,256,256);x.strokeStyle='#c4bcab';x.lineWidth=2;for(var t=0;t<=2;t++){x.strokeRect(t*128,0,0.5,256);x.strokeRect(0,t*128,256,0.5);}}
+    else if(kind==='stone'){x.fillStyle='#cfc9bb';x.fillRect(0,0,256,256);for(var q=0;q<4;q++)for(var w=0;w<2;w++){var gq=Math.floor(rnd()*30);x.fillStyle='rgb('+(180+gq)+','+(174+gq)+','+(158+gq)+')';x.fillRect(w*128+(q%2)*64-64,q*64,126,62);x.fillRect(w*128+(q%2)*64+192,q*64,126,62);}}
+    else{x.fillStyle='#d8c5a3';x.fillRect(0,0,256,256);x.strokeStyle='#b29a73';x.lineWidth=2;for(var u=0;u<=4;u++){x.strokeRect(u*64,0,0.5,256);x.strokeRect(0,u*64,256,0.5);}}
+    var tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return tx;}
+  var base={};FLOORS.forEach(function(f){if(!base[f.t])base[f.t]=tex(f.t);var t=base[f.t].clone();t.needsUpdate=true;var w=f.x2-f.x1,d=f.y2-f.y1;t.repeat.set(w/4,d/4);
+    var m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshLambertMaterial({map:t}));m.rotation.x=-Math.PI/2;m.position.set((f.x1+f.x2)/2,f.L*FH+0.02,(f.y1+f.y2)/2);scene.add(m);});
+  // ---- state
+  var CUTS=[9.52,19.52,29.52,999],clip=new THREE.Plane(new THREE.Vector3(0,-1,0),CUTS[0]);
+  var st={mode:'doll',cut:0,az:Math.PI+0.62,pol:0.78,R:47,px:10,py:-12,pz:0,cz:0,h:0,pitch:0,keys:{},tour:null,run:false};
+  function ground(x,y,z){var best=null;for(var i=0;i<SURF.length;i++){var s=SURF[i];if(x>=s.x1&&x<=s.x2&&y>=s.y1&&y<=s.y2&&s.z<=z+0.8&&s.z>=z-1.05){if(best===null||s.z>best)best=s.z;}}return best;}
+  function blocked(x,y,z){var r=0.45;for(var i=0;i<COL.length;i++){var w=COL[i];if(z<w.z1-0.3&&z+5>w.z0&&x>w.x1-r&&x<w.x2+r&&y>w.y1-r&&y<w.y2+r)return true;}return false;}
+  function tryMove(dx,dy,free){var nx=st.px+dx,ny=st.py+dy,gz;
+    if(free){gz=ground(nx,ny,st.pz);st.px=nx;st.py=ny;if(gz!==null)st.pz=gz;return;}
+    gz=ground(nx,st.py,st.pz);if(gz!==null&&!blocked(nx,st.py,gz)){st.px=nx;st.pz=gz;}
+    gz=ground(st.px,ny,st.pz);if(gz!==null&&!blocked(st.px,ny,gz)){st.py=ny;st.pz=gz;}}
+  var JUMPS=[['Go to a room…'],['Street view',6,-24,0,0,0.12],['Main Hall, from the door',10,1.2,0,-0.38,0.08],['Dining and temple',2.2,11.5,0,0.55],['Kitchen',1.5,22,0,0.75],['Wash yard',1.5,39.5,0,1.0],
+    ['Master Bedroom',10.5,18.5,1,Math.PI+0.45],['Balcony',10,-2.6,1,Math.PI+0.5],['2nd Bedroom',7.2,22.6,1,-0.75],['Office Room',6.4,24.2,2,-1.0,0.12],['Office pantry',6.2,29.3,2,-0.75,0.28],['Open Terrace',10.5,17.5,2,Math.PI+0.35]];
+  var jump=document.getElementById('jump');jump.innerHTML=JUMPS.map(function(j,i){return '<option value="'+i+'">'+j[0]+'</option>';}).join('');
+  jump.addEventListener('change',function(){var j=JUMPS[+this.value];if(!j||j.length<2)return;setMode('walk');st.tour=null;setTourBtn();st.px=j[1];st.py=j[2];st.pz=st.cz=j[3]*FH;st.h=j[4];st.pitch=j[5]||0;this.value=0;});
+  var TOUR=[[10,-12],[10,-1.5],[10,2],[9.6,8],[9.6,13],[9.8,18.6],[3,19.2],[1.5,20.5],[1.5,24],[1.5,29.5],[1.6,31.5],[3.4,31.5],[9,31.5],[10.5,31.5],[10.5,29.5],[10.5,24],[10.5,22.5],
+    [10.5,20.5],[10.3,17.5],[8.2,13],[8.4,6],[9.6,1.8],[10.4,0.3],[10.4,-0.8],[10,-3],[10.4,-0.8],[10.4,1],[8.4,8],[9.6,17],[10.5,20.5],[10.5,22.5],[8.5,22.4],[7.2,22.6],[7.2,28.4],[4.6,29.9],[4.6,31.5],
+    [6.2,31.5],[9,31.5],[10.5,32.3],[10.5,30.8],[10.5,24],[10.5,22.5],[8.5,22.5],[6.6,23.3],[6.6,29.6],[6.6,24],[8.5,22.5],[10.5,22.5],[10.5,20.5],[10.5,17],[8,11],[6,4]];
+  var tourBtn=document.getElementById('tourBtn');function setTourBtn(){tourBtn.textContent=st.tour===null?'Play guided tour':'Stop tour';}
+  tourBtn.addEventListener('click',function(){if(st.tour!==null){st.tour=null;}else{setMode('walk');st.px=TOUR[0][0];st.py=TOUR[0][1];st.pz=st.cz=0;st.h=0;st.pitch=0;st.tour=1;}setTourBtn();});
+  var mini=document.getElementById('mini'),miniL=-1;
+  function setMode(m){st.mode=m;[].forEach.call(document.getElementById('modeSeg').children,function(c){c.setAttribute('aria-pressed',c.dataset.m===m);});
+    document.getElementById('cutSeg').style.display=m==='doll'?'':'none';document.getElementById('pad').hidden=m!=='walk';mini.hidden=m!=='walk';
+    renderer.clippingPlanes=m==='doll'?[clip]:[];head.intensity=m==='walk'?0.38:0;
+    help.textContent=m==='doll'?'Drag to rotate. Scroll or pinch to zoom. Use the floor buttons to lift the floors off one by one.':'Move with W A S D or the arrow keys, or the on-screen pad. Drag to look around. Walk up the stairs to change floor, or pick a room from the list.';
+    if(m!=='walk'){st.tour=null;setTourBtn();}}
+  document.getElementById('modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setMode(b.dataset.m);});
+  document.getElementById('cutSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.cut=+b.dataset.c;clip.constant=CUTS[st.cut];[].forEach.call(this.children,function(c){c.setAttribute('aria-pressed',c===b);});});
+  // ---- input
+  var ptrs={},lastPinch=0;
+  canvas.addEventListener('pointerdown',function(e){ptrs[e.pointerId]={x:e.clientX,y:e.clientY};try{canvas.setPointerCapture(e.pointerId);}catch(err){}});
+  canvas.addEventListener('pointermove',function(e){var p=ptrs[e.pointerId];if(!p)return;var dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;var ids=Object.keys(ptrs);
+    if(ids.length===2){var a=ptrs[ids[0]],b=ptrs[ids[1]],d=Math.hypot(a.x-b.x,a.y-b.y);if(lastPinch&&st.mode==='doll')st.R=Math.min(140,Math.max(14,st.R*lastPinch/d));lastPinch=d;return;}
+    if(st.mode==='doll'){st.az-=dx*0.006;st.pol=Math.min(1.5,Math.max(0.08,st.pol-dy*0.005));}else{st.h+=dx*0.005;st.pitch=Math.min(1.1,Math.max(-1.1,st.pitch+dy*0.004));}});
+  function up(e){delete ptrs[e.pointerId];lastPinch=0;}canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('wheel',function(e){e.preventDefault();if(st.mode==='doll')st.R=Math.min(140,Math.max(14,st.R*(1+Math.sign(e.deltaY)*0.08)));else{var s=-Math.sign(e.deltaY)*0.8;tryMove(Math.sin(st.h)*s,Math.cos(st.h)*s);}},{passive:false});
+  var KM={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',ArrowLeft:'l',ArrowRight:'r',KeyA:'sl',KeyD:'sr',KeyQ:'l',KeyE:'r'};
+  window.addEventListener('keydown',function(e){if(!st.run||st.mode!=='walk'||!KM[e.code])return;var t=e.target.tagName;if(t==='SELECT'||t==='INPUT')return;st.keys[KM[e.code]]=1;e.preventDefault();});
+  window.addEventListener('keyup',function(e){if(KM[e.code])st.keys[KM[e.code]]=0;});
+  [].forEach.call(document.querySelectorAll('#pad button'),function(b){var k=b.dataset.k;b.addEventListener('pointerdown',function(e){st.keys[k]=1;e.preventDefault();});['pointerup','pointerleave','pointercancel'].forEach(function(n){b.addEventListener(n,function(){st.keys[k]=0;});});});
+  function resize(){var w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  window.addEventListener('resize',resize);
+  var last=0,raf=0,LN=['Ground floor','First floor','Second floor'];
+  function tick(t){raf=requestAnimationFrame(tick);var dt=Math.min(0.05,(t-last)/1000||0.016);last=t;
+    if(st.mode==='doll'){var top=Math.min(CUTS[st.cut],31),ty=Math.max(2,top-7);var sp=Math.sin(st.pol),cp=Math.cos(st.pol);
+      cam.position.set(6+st.R*sp*Math.sin(st.az),ty+st.R*cp,19+st.R*sp*Math.cos(st.az));cam.lookAt(6,ty,19);
+      hud.textContent='Dollhouse · '+['Ground floor','Ground + First','Ground + First + Second','Whole house'][st.cut];}
+    else{
+      if(st.tour!==null){var w=TOUR[st.tour],dx=w[0]-st.px,dy=w[1]-st.py,d=Math.hypot(dx,dy),sp2=4.2*dt;
+        if(d<0.15){st.tour++;if(st.tour>=TOUR.length){st.tour=null;setTourBtn();}}
+        else{var th=Math.atan2(dx,dy),dh=th-st.h;while(dh>Math.PI)dh-=2*Math.PI;while(dh<-Math.PI)dh+=2*Math.PI;st.h+=dh*Math.min(1,dt*3.2);st.pitch+=(0-st.pitch)*Math.min(1,dt*3);
+          var m=Math.min(sp2,d)*(Math.abs(dh)>1.2?0.25:1);tryMove(dx/d*m,dy/d*m,true);}}
+      else{var k=st.keys,tu=1.9*dt,mv=5.5*dt;if(k.l)st.h+=tu;if(k.r)st.h-=tu;var fx=Math.sin(st.h),fy=Math.cos(st.h);
+        if(k.f)tryMove(fx*mv,fy*mv);if(k.b)tryMove(-fx*mv,-fy*mv);if(k.sl)tryMove(fy*mv*0.8,-fx*mv*0.8);if(k.sr)tryMove(-fy*mv*0.8,fx*mv*0.8);}
+      st.cz+=(st.pz-st.cz)*Math.min(1,dt*9);var ey=st.cz+5.3,cpz=Math.cos(st.pitch);
+      cam.position.set(st.px,ey,st.py);cam.lookAt(st.px+Math.sin(st.h)*cpz,ey-Math.sin(st.pitch),st.py+Math.cos(st.h)*cpz);head.position.set(st.px,ey+1.5,st.py);
+      var L=Math.max(0,Math.min(2,Math.round(st.pz/FH-0.2))),nm='';ROOMS.forEach(function(r){if(r.L===L&&st.px>=r.x1&&st.px<=r.x2&&st.py>=r.y1&&st.py<=r.y2)nm=r.name;});
+      if(st.py<-5&&L===0)nm='Street';hud.textContent=LN[L]+(nm?' · '+nm:'')+(st.tour!==null?' · guided tour':'');
+      if(L!==miniL){miniL=L;mini.innerHTML=planSVG(L,{mini:true});}
+      var dot=document.getElementById('mm-dot'),dir=document.getElementById('mm-dir');if(dot){var mx=Math.max(-1,Math.min(13,st.px)),my=Math.max(-5,Math.min(45,st.py));dot.setAttribute('cx',mx);dot.setAttribute('cy',my);dir.setAttribute('x1',mx);dir.setAttribute('y1',my);dir.setAttribute('x2',mx+Math.sin(st.h)*2.2);dir.setAttribute('y2',my+Math.cos(st.h)*2.2);}}
+    renderer.render(scene,cam);}
+  setMode('doll');
+  return {start:function(){if(st.run)return;st.run=true;resize();last=performance.now();raf=requestAnimationFrame(tick);},stop:function(){st.run=false;cancelAnimationFrame(raf);},st:st,setMode:setMode,jumpTo:function(i){jump.value=i;jump.dispatchEvent(new Event('change'));}};
+}
+window.__house={get three(){return three;},SURF:SURF,COL:COL};
+show(location.hash.slice(1)||'plans');
+})();
+</script>
+</body>
+</html>
