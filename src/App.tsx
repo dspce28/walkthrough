@@ -1,124 +1,113 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { buildElevations } from './elevations/elevations';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { compilePlan } from './plan/compile';
 import { buildG2House } from './plan/houses/g2House';
 import { planSVG } from './plan2d/planSvg';
-import { Notes } from './views/Notes';
 
 const Viewer = lazy(() => import('./viewer/Viewer').then((m) => ({ default: m.Viewer })));
 
-const VIEWS = [
-  ['plans', 'Floor plans'],
-  ['walkthrough', '3D walkthrough'],
-  ['elevations', 'Front elevations'],
-  ['notes', 'Notes and questions'],
-] as const;
-type View = (typeof VIEWS)[number][0];
-
-const fromHash = (): View => {
-  const h = location.hash.slice(1);
-  return (VIEWS.find(([v]) => v === h)?.[0] ?? 'plans') as View;
-};
+/** True while the element is (nearly) on screen. Used to load the 3D viewer lazily and pause it off screen. */
+function useOnScreen<T extends Element>(margin = '200px') {
+  const ref = useRef<T>(null);
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { rootMargin: margin });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [margin]);
+  return [ref, on] as const;
+}
 
 export default function App() {
   const compiled = useMemo(() => compilePlan(buildG2House()), []);
-  const [view, setView] = useState<View>(fromHash);
-  const [seen3d, setSeen3d] = useState(view === 'walkthrough');
-  useEffect(() => {
-    const on = () => setView(fromHash());
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
-  }, []);
-  useEffect(() => { if (view === 'walkthrough') setSeen3d(true); }, [view]);
-  const go = (v: View) => { history.replaceState(null, '', `#${v}`); setView(v); };
   const { plan } = compiled;
+  const [stageRef, stageOn] = useOnScreen<HTMLDivElement>();
+  const [loaded3d, setLoaded3d] = useState(false);
+  useEffect(() => { if (stageOn) setLoaded3d(true); }, [stageOn]);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 40);
+    on(); window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+
+  const bedrooms = plan.rooms.filter((r) => /bedroom/i.test(r.name)).length;
 
   return (
     <>
-      <header>
-        <div className="wrap">
-          <div className="head">
-            <div>
-              <h1>{plan.name} · Plan and Walkthrough</h1>
-            </div>
-            <div className="meta"><span>Grid 1 sq = 1′ × 1′</span><span>Clear width 12′</span><span>Ground depth 44′</span><span>Upper floors 38′ + 4′ front extension</span></div>
-          </div>
-          <nav role="tablist" aria-label="Sheets">
-            {VIEWS.map(([v, label]) => <button key={v} role="tab" aria-selected={view === v} onClick={() => go(v)}>{label}</button>)}
-          </nav>
-        </div>
+      <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
+        <a className="brand" href="#top" aria-label="G+2 Residence, back to top">
+          <span className="brand-mark">G+2</span>
+          <span className="brand-name">Residence</span>
+        </a>
+        <nav aria-label="Sections">
+          <a href="#walkthrough">3D Walkthrough</a>
+          <a href="#plans">Floor Plans</a>
+        </nav>
       </header>
-      <main className={view === 'walkthrough' ? 'wide' : 'wrap'}>
-        {view === 'plans' && <Plans compiled={compiled} />}
-        {seen3d && (
-          <div hidden={view !== 'walkthrough'}>
-            <Suspense fallback={<p className="lead">Loading 3D viewer…</p>}>
-              <Viewer compiled={compiled} active={view === 'walkthrough'} />
-            </Suspense>
-          </div>
-        )}
-        {view === 'elevations' && <Elevations />}
-        {view === 'notes' && <Notes />}
-      </main>
-    </>
-  );
-}
 
-function Plans({ compiled }: { compiled: ReturnType<typeof compilePlan> }) {
-  const [floor, setFloor] = useState<'all' | number>('all');
-  const [grid, setGrid] = useState(false);
-  const { plan } = compiled;
-  return (
-    <section>
-      <p className="lead">Drawn from your three sketches at one grid square per foot, with the road at the top of each plan as in the sketches. Pick a single floor to see furniture names and the furniture list.</p>
-      <div className="bar">
-        <div className="seg" role="group" aria-label="Floor">
-          <button aria-pressed={floor === 'all'} onClick={() => setFloor('all')}>All floors</button>
-          {plan.levels.map((l, i) => <button key={i} aria-pressed={floor === i} onClick={() => setFloor(i)}>{l.name.split(' ')[0]}</button>)}
+      <section className="hero" id="top">
+        <div className="hero-media" aria-hidden="true">
+          <img src={`${import.meta.env.BASE_URL}hero-hall.webp`} alt="" width={990} height={838} fetchPriority="high" />
+          <span className="hero-caption">Main hall · real-time render</span>
         </div>
-        <label className="chk"><input type="checkbox" checked={grid} onChange={(e) => setGrid(e.target.checked)} /> Show 1′ grid and row numbers</label>
-      </div>
-      {floor === 'all' ? (
+        <div className="hero-inner">
+          <p className="eyebrow">Bespoke Interior Proposal</p>
+          <h1>The G+2<br /><em>Residence</em></h1>
+          <p className="hero-lede">Three levels of walnut, marble and brass. Walk through every room and see every finish before a single wall is built.</p>
+          <div className="hero-cta">
+            <a className="btn-gold" href="#walkthrough">Enter the walkthrough</a>
+            <a className="btn-line" href="#plans">View floor plans</a>
+          </div>
+        </div>
+        <dl className="stats">
+          <div><dt>Levels</dt><dd>{plan.levels.length}</dd></div>
+          <div><dt>Plot</dt><dd>12′ × 44′</dd></div>
+          <div><dt>Bedrooms</dt><dd>{bedrooms}</dd></div>
+          <div><dt>Roof</dt><dd>Open terrace</dd></div>
+        </dl>
+        <a className="scroll-cue" href="#walkthrough" aria-label="Scroll to the walkthrough"><span /></a>
+      </section>
+
+      <section className="section" id="walkthrough">
+        <header className="section-head">
+          <p className="eyebrow">Experience</p>
+          <h2>3D Walkthrough</h2>
+          <p className="section-lede">Orbit the dollhouse, step inside, or let the guided tour lead you through all three floors.</p>
+        </header>
+        <div className="stage-wrap" ref={stageRef}>
+          {loaded3d ? (
+            <Suspense fallback={<div className="stage stage-placeholder" />}>
+              <Viewer compiled={compiled} active={stageOn} />
+            </Suspense>
+          ) : <div className="stage stage-placeholder" />}
+        </div>
+      </section>
+
+      <section className="section" id="plans">
+        <header className="section-head">
+          <p className="eyebrow">Architecture</p>
+          <h2>Floor Plans</h2>
+          <p className="section-lede">Drawn to scale at one square per foot, with the road at the top of each sheet.</p>
+        </header>
         <div className="plans">
           {plan.levels.map((l, i) => (
-            <div className="card" key={i}><h3>{l.name}<span>{l.size}</span></h3><div className="drawing" dangerouslySetInnerHTML={{ __html: planSVG(compiled, i, { grid }) }} /></div>
+            <figure className="plan-card" key={i}>
+              <figcaption>
+                <span className="plan-index">0{i + 1}</span>
+                <span className="plan-name">{l.name}</span>
+                <span className="plan-size">{l.size}</span>
+              </figcaption>
+              <div className="drawing" dangerouslySetInnerHTML={{ __html: planSVG(compiled, i) }} />
+            </figure>
           ))}
         </div>
-      ) : (
-        <div className="plans single">
-          <div className="card"><h3>{plan.levels[floor].name}<span>furniture shown</span></h3><div className="drawing" dangerouslySetInnerHTML={{ __html: planSVG(compiled, floor, { grid, labels: true }) }} /></div>
-          <div className="card sched"><h3>Furniture list</h3>
-            {plan.schedule?.[floor].map(([room, list]) => <div key={room}><h4>{room}</h4><ul>{list.map((x) => <li key={x}>{x}</li>)}</ul></div>)}
-          </div>
-        </div>
-      )}
-      <div className="legend">
-        <span><i style={{ background: '#2b3138' }} />Wall</span>
-        <span><i style={{ background: '#c8ccd0' }} />Parapet or railing</span>
-        <span><i style={{ background: '#bcd9e2' }} />Window</span>
-        <span><i style={{ background: '#fff', borderStyle: 'dashed' }} />Line of floor above</span>
-        <span>Arc = door swing</span>
-        <span>Arrow = stair going up</span>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-function Elevations() {
-  const opts = useMemo(() => buildElevations(), []);
-  return (
-    <section>
-      <p className="lead">Three directions for the road face, drawn to scale as seen from the road, so the first-floor washroom is on the right and the balcony and main door are on the left. Each one hides the washroom's soil and waste pipes inside the design (blue dashed line). None uses ovals or arches.</p>
-      <div className="elevs">
-        {opts.map((o) => (
-          <div className="card" key={o.name}>
-            <h3>{o.name}<span>{o.cost}</span></h3>
-            <div className="drawing" dangerouslySetInnerHTML={{ __html: `<svg viewBox="-24 80 328 660" role="img" aria-label="Front elevation ${o.name}">${o.svg}</svg>` }} />
-            <p><b>{o.tag}.</b> {o.text}</p>
-            <dl><dt>Pipes</dt><dd>{o.pipes}</dd><dt>Materials</dt><dd>{o.mat}</dd></dl>
-          </div>
-        ))}
-      </div>
-    </section>
+      <footer className="site-footer">
+        <span className="brand-mark">G+2</span>
+        <p>Residence · Interior proposal · Visualisation is indicative; finishes and furniture are subject to final selection.</p>
+      </footer>
+    </>
   );
 }

@@ -13,6 +13,8 @@ import { MODEL_URL } from './parts';
 import { EYE, makeWalker, type NavState } from './walk';
 
 export type Quality = 'high' | 'fast';
+/** Default dollhouse framing: three-quarter view from the road side, whole house in frame. */
+export const DOLL_CAMERA: [number, number, number] = [30, 38, -34];
 export type TimeOfDay = 'day' | 'evening';
 export interface SceneSettings { visibleLevels: number; quality: Quality; time: TimeOfDay; mode: 'doll' | 'walk' }
 
@@ -29,6 +31,7 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
   return (
     <>
       <Environment files={HDRI('kloofendal_43d_clear_puresky')} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : 0.55} />
+      <fog attach="fog" args={['#c9cdc8', 140, 520]} />
       <Sun evening={evening} hi={hi} />
       <hemisphereLight args={['#e3ecf3', '#d6c7ad', evening ? 0.08 : 0.45]} />
       <InteriorLights compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} evening={evening} />
@@ -74,12 +77,12 @@ function Sun({ evening, hi }: { evening: boolean; hi: boolean }) {
 /** Ground, road, kerb, and simple neighbouring blocks so the house sits in a street. */
 function Site({ compiled, neighbours }: { compiled: CompiledPlan; neighbours: boolean }) {
   const yRoad = compiled.plan.street.yRoad;
-  const lawn = useMemo(() => new THREE.MeshStandardMaterial({ color: '#7f8b6c', roughness: 1 }), []);
+  const lawn = useMemo(() => new THREE.MeshStandardMaterial({ color: '#a8a291', roughness: 1 }), []);
   const asphalt = useMemo(() => new THREE.MeshStandardMaterial({ color: '#4e5256', roughness: 0.95 }), []);
   const neighbour = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d8d0c0', roughness: 0.9 }), []);
   return (
     <group>
-      <mesh rotation-x={-Math.PI / 2} position={[6, -0.32, 20]} material={lawn} receiveShadow><planeGeometry args={[500, 500]} /></mesh>
+      <mesh rotation-x={-Math.PI / 2} position={[6, -0.32, 20]} material={lawn} receiveShadow><planeGeometry args={[3000, 3000]} /></mesh>
       <mesh rotation-x={-Math.PI / 2} position={[6, -0.3, yRoad]} material={asphalt} receiveShadow><planeGeometry args={[500, 22]} /></mesh>
       {[-1, 1].map((s) => <mesh key={s} position={[6, -0.15, yRoad + s * 11.5]} material={getMat('coping')} receiveShadow><boxGeometry args={[500, 0.35, 1]} /></mesh>)}
       {neighbours && [-14, 26].map((x) => (
@@ -196,9 +199,13 @@ function CameraRig({ compiled, nav, visibleLevels, onHud }: { compiled: Compiled
     const dt = Math.min(0.05, rawDt);
     const cam = camera as THREE.PerspectiveCamera;
     if (nav.mode === 'doll') {
-      if (lastMode.current !== 'doll') {
+      if (lastMode.current !== 'doll' || nav.resetDoll) {
+        nav.resetDoll = false;
         cam.fov = 45; cam.updateProjectionMatrix();
-        camera.position.set(24, 34, -6);
+        // pull back on portrait screens so the whole house still fits
+        const ty = Math.max(2, Math.min(visibleLevels, 2) * plan.floorHeight + 2), k = cam.aspect < 1 ? 1 / Math.max(0.45, cam.aspect) : 1;
+        camera.position.set(6 + (DOLL_CAMERA[0] - 6) * k, ty + (DOLL_CAMERA[1] - ty) * k, 19 + (DOLL_CAMERA[2] - 19) * k);
+        orbit.current?.target.set(6, ty, 19);
       }
       const ty = Math.max(2, Math.min(visibleLevels, 2) * plan.floorHeight + 2);
       if (orbit.current) { orbit.current.target.lerp(new THREE.Vector3(6, ty, 19), Math.min(1, dt * 4)); orbit.current.update(); }

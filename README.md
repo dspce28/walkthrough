@@ -2,7 +2,7 @@
 
 React + Three.js rebuild of the single-page "G+2 House Plan and Walkthrough" drawing set
 (`reference/original-g2-house.html`), with real furniture models, PBR materials, soft shadows,
-ambient occlusion, a cinematic guided tour and in-browser video recording of the walkthrough.
+ambient occlusion and a cinematic guided tour, presented as a premium single-page site.
 
 ```bash
 npm install
@@ -14,12 +14,16 @@ Append `?q=fast` to force the low-end preset, `?debug` to expose renderer stats 
 
 ## What is on the page
 
-| Tab | Source |
+A single scrolling page (`src/App.tsx`, styles in `src/index.css`):
+
+| Section | Source |
 | --- | --- |
-| Floor plans | `src/plan2d/planSvg.ts` draws SVG from the plan data |
-| 3D walkthrough | `src/viewer/*`: dollhouse (cutaway per floor), walk mode, room jumps, guided tour, video recording, day/evening, high/fast quality |
-| Front elevations | `src/elevations/elevations.ts`, ported as-is (house-specific drawings) |
-| Notes and questions | `src/views/Notes.tsx`, ported as-is |
+| Hero | static render of the main hall (`public/hero-hall.webp`, captured from the 3D viewer) |
+| 3D walkthrough | `src/viewer/*`: Dollhouse, Walk inside, Whole house (reset view), Play guided tour. Quality is chosen automatically. |
+| Floor plans | `src/plan2d/planSvg.ts` draws all three floors as SVG from the plan data |
+
+The viewer still supports per-floor cutaways, evening lighting and video recording in code
+(`Scene` settings, `TourPlayer`); they are just not exposed in the UI.
 
 ## Architecture: one plan schema drives everything
 

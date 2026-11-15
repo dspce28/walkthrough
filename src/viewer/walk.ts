@@ -11,10 +11,12 @@ export interface NavState {
   keys: Record<string, boolean>;
   tour: TourPlayer | null;
   onTourEnd?: () => void;
+  /** set by the UI to snap the dollhouse camera back to its default framing */
+  resetDoll?: boolean;
 }
 
 export function createNav(): NavState {
-  return { mode: 'doll', px: 10, py: -12, pz: 0, cz: 0, heading: 0, pitch: 0, keys: {}, tour: null };
+  return { mode: 'doll', px: 10, py: -12, pz: 0, cz: 0, heading: 0, pitch: 0, keys: {}, tour: null, resetDoll: true };
 }
 
 export function makeWalker(c: CompiledPlan) {
