@@ -182,7 +182,8 @@ for lv in levels:
         for axis in (0, 1):
             px = sum(np.roll(px, s - 2, axis=axis) * k[s] for s in range(5))
     lit = px[px.max(axis=2) > 1e-4]
-    scale = float(np.percentile(lit, 99.5)) if lit.size else 1.0
+    # encoding range: LED strips and their hot spots would dominate a high percentile, so cap it and let them clip
+    scale = min(float(np.percentile(lit, 98.0)), 4.0) if lit.size else 1.0
     enc = np.clip(px / scale, 0, 1)
     enc = np.where(enc <= 0.0031308, enc * 12.92, 1.055 * np.power(enc, 1 / 2.4) - 0.055)
     out = bpy.data.images.new(f'lm8_L{lv}', a.res, a.res, alpha=False)

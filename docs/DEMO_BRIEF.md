@@ -56,8 +56,11 @@ and profile lights; fluted / panelled feature walls; arched niches; modular join
    cushions/throw, modern armchair, `dining_chair_02` model; decor props (pampas, sculpture, book stacks, bowls) live on
    those pieces. `src/style/decor.ts` adds corner plants by rule (clear of furniture, doors, stairs).
    KNOWN: dark smudges on walls are old-furniture shadows in the OLD bake; re-bake fixes. Original text: Decor props per room type (also replace the classic chandeliers/armchair/Persian rugs/zigzag pillows with modern picks) (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
-4. **Exposure**: brighter high-key look; re-bake with neutral 3500-4000K lights (`--lamp-watts`, lamp colours in `lightAnchors`).
-5. **Re-export + re-bake** (`?export` then `bake.py`), copy to `public/baked/g2-house/`, tune `BAKE_EXPOSURE`.
+4. ~~**Exposure**~~ DONE (kit lamp colours ~3500 K, env 0.75, city HDRI in the bake). Original text: **Exposure**: brighter high-key look; re-bake with neutral 3500-4000K lights (`--lamp-watts`, lamp colours in `lightAnchors`).
+5. ~~**Re-export + re-bake**~~ DONE: `?export` now ignores existing bakes; bake.py caps the lightmap range (LED strips
+   otherwise dominate the 8-bit encoding); `scripts/bake/rescale.py bake.json 4` re-encodes an existing bake without
+   re-baking. KNOWN: bed-wall panel tiles look slightly streaky (low lightmap texel density on many small faces);
+   option: exclude `feature` panels from the bake or bake at 2048 on a GPU. Original text: **Re-export + re-bake** (`?export` then `bake.py`), copy to `public/baked/g2-house/`, tune `BAKE_EXPOSURE`.
 6. **Cinematic tour**: ~15 composed slow shots auto-generated per room (eye level, 5 s each), plus free walk.
 7. Later: comment pins on objects (homeowner feedback before work starts); style toggle; 2D-upload pipeline.
 

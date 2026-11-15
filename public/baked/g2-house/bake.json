@@ -3,22 +3,22 @@
   {
    "level": 0,
    "image": "lm_L0.webp",
-   "scale": 2.619412660598755
+   "scale": 4.0
   },
   {
    "level": 1,
    "image": "lm_L1.webp",
-   "scale": 2.770390748977661
+   "scale": 4.0
   },
   {
    "level": 2,
    "image": "lm_L2.webp",
-   "scale": 2.811279058456421
+   "scale": 2.716811418533325
   },
   {
    "level": 3,
    "image": "lm_L3.webp",
-   "scale": 8.008233070373535
+   "scale": 2.4066035747528076
   }
  ]
 }
