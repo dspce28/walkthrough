@@ -35,6 +35,14 @@ const SIMPLIFY = {
   bar_chair_round_01: [0.25, 0.01], brass_diya_lantern: [0.4, 0.002], ceramic_vase_01: [0.4, 0.002],
 };
 
+/** Hero pieces also get a 2K-texture version for desktop (High quality). Phones keep the 1K files. */
+export const HIRES = [
+  'Sofa_01', 'sofa_03', 'ArmChair_01', 'GreenChair_01', 'Chandelier_01', 'ClassicConsole_01', 'vintage_cabinet_01',
+  'modern_coffee_table_01', 'GothicCommode_01', 'Ottoman_01', 'modern_wooden_cabinet', 'throw_pillows_01', 'potted_plant_02',
+  'round_wooden_table_01', 'modern_arm_chair_01', 'mid_century_lounge_chair', 'side_table_tall_01', 'bar_chair_round_01',
+  'painted_wooden_sofa', 'outdoor_table_chair_set_01',
+];
+
 export const TEXTURES = [
   'marble_01', 'herringbone_parquet', 'oak_wood_planks', 'floor_tiles_06', 'large_grey_tiles', 'patio_tiles',
   'wood_floor_deck', 'plastered_wall', 'dark_wood', 'granite_tile', 'grey_tiles',
@@ -54,13 +62,13 @@ async function download(url, dest) {
   await writeFile(dest, Buffer.from(await r.arrayBuffer()));
 }
 
-async function model(id) {
-  const dest = path.join(OUT, 'models', `${id}.glb`);
+async function model(id, hires = false) {
+  const dest = path.join(OUT, hires ? 'models-2k' : 'models', `${id}.glb`);
   if (!FORCE && await exists(dest)) return 'skip';
   const files = await api(`files/${id}`);
-  const g = files.gltf?.['1k']?.gltf ?? files.gltf?.['2k']?.gltf;
+  const g = hires ? (files.gltf?.['2k']?.gltf ?? files.gltf?.['1k']?.gltf) : (files.gltf?.['1k']?.gltf ?? files.gltf?.['2k']?.gltf);
   if (!g) throw new Error(`${id}: no glTF download`);
-  const tmp = path.join(os.tmpdir(), `ph-${id}`);
+  const tmp = path.join(os.tmpdir(), `ph-${id}${hires ? '-2k' : ''}`);
   await rm(tmp, { recursive: true, force: true });
   const main = path.join(tmp, path.basename(new URL(g.url).pathname));
   await download(g.url, main);
@@ -68,7 +76,7 @@ async function model(id) {
   await mkdir(path.dirname(dest), { recursive: true });
   const cli = path.join(ROOT, 'node_modules', '.bin', 'gltf-transform');
   execFileSync(cli, ['optimize', main, dest, '--compress', 'false', '--texture-compress', 'webp',
-    '--texture-size', '1024',
+    '--texture-size', hires ? '2048' : '1024',
     ...(SIMPLIFY[id] ? ['--simplify', 'true', '--simplify-ratio', String(SIMPLIFY[id][0]), '--simplify-error', String(SIMPLIFY[id][1])] : ['--simplify', 'false']), '--instance', 'false', '--flatten', 'false'], { stdio: 'pipe' });
   await rm(tmp, { recursive: true, force: true });
   return 'ok';
@@ -98,6 +106,7 @@ async function hdri(id) {
 
 const jobs = [
   ...MODELS.map((id) => ['model', id, model]),
+  ...HIRES.map((id) => ['model2k', id, (i) => model(i, true)]),
   ...TEXTURES.map((id) => ['texture', id, texture]),
   ...HDRIS.map((id) => ['hdri', id, hdri]),
 ];

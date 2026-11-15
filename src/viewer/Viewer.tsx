@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { CompiledPlan } from '../plan/compile';
 import { planSVG } from '../plan2d/planSvg';
 import { DOLL_CAMERA, Scene, type HudInfo, type Quality } from './Scene';
+import { setHiresModels } from './parts';
 import { createNav, TourPlayer } from './walk';
 
 const KEYMAP: Record<string, string> = { KeyW: 'f', ArrowUp: 'f', KeyS: 'b', ArrowDown: 'b', ArrowLeft: 'l', ArrowRight: 'r', KeyA: 'sl', KeyD: 'sr', KeyQ: 'l', KeyE: 'r' };
@@ -20,7 +21,7 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   const { plan } = compiled;
   const nav = useMemo(() => createNav(), []);
   const [mode, setMode] = useState<'doll' | 'walk'>('doll');
-  const [quality] = useState<Quality>(autoQuality);
+  const [quality] = useState<Quality>(() => { const q = autoQuality(); setHiresModels(q === 'high'); return q; });
   const [touring, setTouring] = useState(false);
   const [hud, setHud] = useState<HudInfo>({ level: 0, room: '', tourProgress: null, px: 0, py: 0, heading: 0 });
   const miniRef = useRef<HTMLDivElement>(null);

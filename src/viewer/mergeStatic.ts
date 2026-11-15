@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
  * Bakes every mesh under `root` into one mesh per material (transforms applied), so a floor full of
  * furniture costs tens of draw calls instead of hundreds. Only position/normal/uv are kept.
  */
-export function mergeStatic(root: THREE.Object3D): THREE.Group {
+export function mergeStatic(root: THREE.Object3D, name = 'merged'): THREE.Group {
   root.updateWorldMatrix(true, true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const buckets = new Map<THREE.Material, THREE.BufferGeometry[]>();
@@ -39,6 +39,7 @@ export function mergeStatic(root: THREE.Object3D): THREE.Group {
     geos.forEach((g) => g.dispose());
     if (!merged) continue;
     const mesh = new THREE.Mesh(merged, mat);
+    mesh.name = `${name}|${out.children.length}`;
     const transparent = (mat as THREE.MeshStandardMaterial).transparent;
     mesh.castShadow = !transparent;
     mesh.receiveShadow = true;

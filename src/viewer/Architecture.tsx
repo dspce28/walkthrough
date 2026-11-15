@@ -12,7 +12,7 @@ interface Curtain { level: number; pos: [number, number, number]; yaw: number; g
  * `cutAt`: in dollhouse view the top visible floor's walls are cut at this absolute height so you can see into
  * the rooms. Cut levels use cloned materials with a clipping plane; other levels keep the shared ones.
  */
-export function Architecture({ compiled, visibleLevels, cutAt }: { compiled: CompiledPlan; visibleLevels: number; cutAt: number | null }) {
+export function Architecture({ compiled, visibleLevels, cutAt, glazingOnly = false }: { compiled: CompiledPlan; visibleLevels: number; cutAt: number | null; glazingOnly?: boolean }) {
   const { batches, curtains } = useMemo(() => build(compiled), [compiled]);
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
   plane.constant = cutAt ?? 1e6;
@@ -27,12 +27,12 @@ export function Architecture({ compiled, visibleLevels, cutAt }: { compiled: Com
   const matFor = (level: number, key: string) => (cutAt != null && level === topLevel ? clipped(key) : getMat(key));
   return (
     <group>
-      {batches.map((b) => (
-        <mesh key={`${b.level}:${b.mat}`} geometry={b.geo} material={matFor(b.level, b.mat)} visible={b.level <= visibleLevels}
+      {batches.filter((b) => !glazingOnly || b.mat === 'glass').map((b) => (
+        <mesh key={`${b.level}:${b.mat}`} name={`arch|L${b.level}|${b.mat}`} geometry={b.geo} material={matFor(b.level, b.mat)} visible={b.level <= visibleLevels}
           castShadow={b.cast} receiveShadow renderOrder={b.mat === 'glass' ? 5 : 0} />
       ))}
       {curtains.map((c, i) => (
-        <mesh key={i} geometry={c.geo} material={matFor(c.level, 'curtain')} position={c.pos} rotation-y={c.yaw} visible={c.level <= visibleLevels} castShadow receiveShadow />
+        <mesh key={i} name={`arch|L${c.level}|curtain${i}`} geometry={c.geo} material={matFor(c.level, 'curtain')} position={c.pos} rotation-y={c.yaw} visible={c.level <= visibleLevels} castShadow receiveShadow />
       ))}
     </group>
   );

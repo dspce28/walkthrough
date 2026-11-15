@@ -382,16 +382,16 @@ const PlacedItem = memo(function PlacedItem({ it, fh, ch }: { it: Item; fh: numb
 });
 
 /** One floor of furniture. Rendered once as React components, then baked into per-material meshes. */
-function LevelFurniture({ items, fh, ch, visible }: { items: Item[]; fh: number; ch: number; visible: boolean }) {
+function LevelFurniture({ level, items, fh, ch, visible }: { level: number; items: Item[]; fh: number; ch: number; visible: boolean }) {
   const ref = useRef<THREE.Group>(null);
   const [merged, setMerged] = useState<THREE.Group | null>(null);
   useLayoutEffect(() => {
     // runs after every model under this floor has loaded (the parent Suspense boundary resolved)
     if (!ref.current || new URLSearchParams(location.search).has('nomerge')) return;
-    const g = mergeStatic(ref.current);
+    const g = mergeStatic(ref.current, `furn|L${level}`);
     setMerged(g);
     return () => { g.traverse((o) => (o as THREE.Mesh).geometry?.dispose()); };
-  }, [items]);
+  }, [items, level]);
   return (
     <group visible={visible}>
       <group ref={ref} visible={!merged}>
@@ -407,7 +407,7 @@ export function Furniture({ plan, visibleLevels }: { plan: HousePlan; visibleLev
   return (
     <group>
       {plan.levels.map((_, L) => (
-        <LevelFurniture key={L} items={plan.items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L <= visibleLevels} />
+        <LevelFurniture key={L} level={L} items={plan.items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L <= visibleLevels} />
       ))}
     </group>
   );

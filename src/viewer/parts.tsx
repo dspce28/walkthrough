@@ -6,7 +6,15 @@ import { getMat } from './materials';
 
 /* Local item space: X = along width (0..w), Z = depth (0..d, front faces +Z), Y = up. All feet. */
 
-export const MODEL_URL = (id: string) => `${import.meta.env.BASE_URL}assets/models/${id}.glb`;
+/** Models that have a 2K-texture build in assets/models-2k (see scripts/fetch-assets.mjs HIRES). */
+const HIRES = new Set(['Sofa_01', 'sofa_03', 'ArmChair_01', 'GreenChair_01', 'Chandelier_01', 'ClassicConsole_01', 'vintage_cabinet_01',
+  'modern_coffee_table_01', 'GothicCommode_01', 'Ottoman_01', 'modern_wooden_cabinet', 'throw_pillows_01', 'potted_plant_02',
+  'round_wooden_table_01', 'modern_arm_chair_01', 'mid_century_lounge_chair', 'side_table_tall_01', 'bar_chair_round_01',
+  'painted_wooden_sofa', 'outdoor_table_chair_set_01']);
+let hiresTextures = false;
+/** Call before the scene mounts: desktop High quality loads the 2K-texture models. */
+export function setHiresModels(on: boolean) { hiresTextures = on; }
+export const MODEL_URL = (id: string) => `${import.meta.env.BASE_URL}assets/${hiresTextures && HIRES.has(id) ? 'models-2k' : 'models'}/${id}.glb`;
 const M_TO_FT = 3.28084;
 
 type MatArg = string | THREE.Material;

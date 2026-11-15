@@ -6,7 +6,9 @@ import { Suspense, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { CompiledPlan } from '../plan/compile';
+import type { HousePlan } from '../plan/types';
 import { Architecture } from './Architecture';
+import { BakedArchitecture, useBakeMeta } from './Baked';
 import { Furniture } from './Furniture';
 import { getMat } from './materials';
 import { MODEL_URL } from './parts';
@@ -20,14 +22,14 @@ export interface SceneSettings { visibleLevels: number; quality: Quality; time: 
 
 const HDRI = (id: string) => `${import.meta.env.BASE_URL}assets/hdri/${id}.hdr`;
 
-// warm the model cache as soon as the module loads
-['Sofa_01', 'sofa_03', 'ArmChair_01', 'GreenChair_01', 'Chandelier_01', 'ClassicConsole_01', 'potted_plant_02', 'potted_plant_04', 'modern_coffee_table_01', 'vintage_cabinet_01', 'modern_wooden_cabinet']
-  .forEach((id) => useGLTF.preload(MODEL_URL(id)));
+const PRELOAD = ['Sofa_01', 'sofa_03', 'ArmChair_01', 'GreenChair_01', 'Chandelier_01', 'ClassicConsole_01', 'potted_plant_02', 'potted_plant_04', 'modern_coffee_table_01', 'vintage_cabinet_01', 'modern_wooden_cabinet'];
 
 export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPlan; nav: NavState; settings: SceneSettings; onHud: (h: HudInfo) => void }) {
   const { plan } = compiled;
   const evening = settings.time === 'evening';
   const hi = settings.quality === 'high';
+  const bake = useBakeMeta(plan.id);
+  useEffect(() => { PRELOAD.forEach((id) => useGLTF.preload(MODEL_URL(id))); }, []);
   return (
     <>
       <Environment files={HDRI('kloofendal_43d_clear_puresky')} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : 0.55} />
@@ -36,12 +38,15 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
       <hemisphereLight args={['#e3ecf3', '#d6c7ad', evening ? 0.08 : 0.45]} />
       <InteriorLights compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} evening={evening} />
       <Site compiled={compiled} neighbours={settings.mode === 'walk'} />
-      <Architecture compiled={compiled} visibleLevels={settings.visibleLevels}
+{/* baked (Cycles) walls/floors/ceilings when available; glass and curtains always stay real-time */}
+      {bake && <Suspense fallback={null}><BakedArchitecture planId={plan.id} meta={bake} visibleLevels={settings.visibleLevels} /></Suspense>}
+            <Architecture compiled={compiled} glazingOnly={!!bake} visibleLevels={settings.visibleLevels}
         cutAt={settings.mode === 'doll' && settings.visibleLevels < plan.levels.length ? settings.visibleLevels * plan.floorHeight + 7 : null} />
       <Suspense fallback={null}>
         <Furniture plan={plan} visibleLevels={settings.visibleLevels} />
       </Suspense>
       {new URLSearchParams(location.search).has('debug') ? <DebugStats /> : null}
+      {new URLSearchParams(location.search).has('export') ? <ExportForBake plan={plan} /> : null}
       <CameraRig compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} onHud={onHud} />
       {hi ? (
         <EffectComposer multisampling={0} enableNormalPass={false}>
@@ -99,8 +104,32 @@ function Site({ compiled, neighbours }: { compiled: CompiledPlan; neighbours: bo
   );
 }
 
-interface Anchor { level: number; x: number; y: number; z: number; strength: number; color: string }
+export interface Anchor { level: number; x: number; y: number; z: number; strength: number; color: string }
 const POOL = 8;
+
+/** Light fixtures (and a ceiling light for every room without one). Shared with the offline bake. */
+export function lightAnchors(plan: HousePlan): Anchor[] {
+  const a: Anchor[] = [], FH = plan.floorHeight, CH = plan.ceilingHeight;
+  const lit = new Set<string>();
+  for (const it of plan.items) {
+    const cx = it.rot % 2 ? it.x + it.d / 2 : it.x + it.w / 2, cy = it.rot % 2 ? it.y + it.w / 2 : it.y + it.d / 2;
+    if (it.type === 'chandelier') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 1.6, strength: 1.4, color: '#ffd9a8' });
+    if (it.type === 'pendant') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 2.6, strength: 0.8, color: '#ffe2b8' });
+    if (it.type === 'chandelier' || it.type === 'pendant') {
+      const r = plan.rooms.find((r) => r.level === it.level && cx >= r.rect[0] && cx <= r.rect[2] && cy >= r.rect[1] && cy <= r.rect[3]);
+      if (r) lit.add(`${r.level}:${r.name}:${r.rect.join()}`);
+    }
+  }
+  for (const r of plan.rooms) {
+    const [x1, y1, x2, y2] = r.rect;
+    if (lit.has(`${r.level}:${r.name}:${r.rect.join()}`)) continue;
+    const area = (x2 - x1) * (y2 - y1);
+    const outdoor = /terrace|porch|yard|balcony/i.test(r.name);
+    a.push({ level: r.level, x: (x1 + x2) / 2, y: (y1 + y2) / 2, z: r.level * FH + CH - (outdoor ? 1.2 : 0.4), strength: Math.min(1.2, 0.4 + area / 80), color: '#fff0dc' });
+  }
+  return a;
+}
+
 
 /**
  * Interior lighting. Real-time renderers cannot afford a light per fixture, so a fixed pool of point lights
@@ -108,27 +137,7 @@ const POOL = 8;
  */
 function InteriorLights({ compiled, nav, visibleLevels, evening }: { compiled: CompiledPlan; nav: NavState; visibleLevels: number; evening: boolean }) {
   const { plan } = compiled;
-  const anchors = useMemo(() => {
-    const a: Anchor[] = [], FH = plan.floorHeight, CH = plan.ceilingHeight;
-    const lit = new Set<string>();
-    for (const it of plan.items) {
-      const cx = it.rot % 2 ? it.x + it.d / 2 : it.x + it.w / 2, cy = it.rot % 2 ? it.y + it.w / 2 : it.y + it.d / 2;
-      if (it.type === 'chandelier') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 1.6, strength: 1.4, color: '#ffd9a8' });
-      if (it.type === 'pendant') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 2.6, strength: 0.8, color: '#ffe2b8' });
-      if (it.type === 'chandelier' || it.type === 'pendant') {
-        const r = plan.rooms.find((r) => r.level === it.level && cx >= r.rect[0] && cx <= r.rect[2] && cy >= r.rect[1] && cy <= r.rect[3]);
-        if (r) lit.add(`${r.level}:${r.name}:${r.rect.join()}`);
-      }
-    }
-    for (const r of plan.rooms) {
-      const [x1, y1, x2, y2] = r.rect;
-      if (lit.has(`${r.level}:${r.name}:${r.rect.join()}`)) continue;
-      const area = (x2 - x1) * (y2 - y1);
-      const outdoor = /terrace|porch|yard|balcony/i.test(r.name);
-      a.push({ level: r.level, x: (x1 + x2) / 2, y: (y1 + y2) / 2, z: r.level * FH + CH - (outdoor ? 1.2 : 0.4), strength: Math.min(1.2, 0.4 + area / 80), color: '#fff0dc' });
-    }
-    return a;
-  }, [plan]);
+  const anchors = useMemo(() => lightAnchors(plan), [plan]);
   const refs = useRef<(THREE.PointLight | null)[]>([]);
   const last = useRef(0);
   const { camera } = useThree();
@@ -153,6 +162,27 @@ function InteriorLights({ compiled, nav, visibleLevels, evening }: { compiled: C
 }
 
 export interface HudInfo { level: number; room: string; tourProgress: number | null; px: number; py: number; heading: number }
+
+/** ?export: once every floor's furniture is merged, export the house GLB and light list for the offline bake. */
+function ExportForBake({ plan }: { plan: HousePlan }) {
+  const { scene } = useThree();
+  useEffect(() => {
+    let done = false;
+    const t = setInterval(async () => {
+      const levels = new Set<string>();
+      scene.traverse((o) => { const m = /^furn\|L(\d+)\|/.exec(o.name); if (m) levels.add(m[1]); });
+      if (done || levels.size < plan.levels.length) return;
+      done = true; clearInterval(t);
+      const { exportHouse } = await import('./exportScene');
+      const buf = await exportHouse(scene);
+      const w = window as unknown as Record<string, unknown>;
+      w.__exportLights = { anchors: lightAnchors(plan), sun: [-34, 70, -46], floorHeight: plan.floorHeight, ceilingHeight: plan.ceilingHeight, levels: plan.levels.length };
+      w.__exportGlb = buf;
+    }, 1000);
+    return () => clearInterval(t);
+  }, [scene, plan]);
+  return null;
+}
 
 /** ?debug exposes renderer stats on window.__stats for profiling. */
 function DebugStats() {
@@ -186,7 +216,7 @@ function CameraRig({ compiled, nav, visibleLevels, onHud }: { compiled: Compiled
       if (!down || nav.mode !== 'walk') return;
       const dx = e.clientX - down.x, dy = e.clientY - down.y; down = { x: e.clientX, y: e.clientY };
       nav.heading -= dx * 0.005; nav.pitch = THREE.MathUtils.clamp(nav.pitch + dy * 0.004, -1.1, 1.1);
-      if (nav.tour) nav.tour = null;
+      if (nav.tour) { nav.tour = null; nav.onTourEnd?.(); }
     };
     const pu = () => { down = null; };
     const wheel = (e: WheelEvent) => { if (nav.mode !== 'walk') return; e.preventDefault(); const s = -Math.sign(e.deltaY) * 0.8; walker.tryMove(nav, Math.sin(nav.heading) * s, Math.cos(nav.heading) * s); };
