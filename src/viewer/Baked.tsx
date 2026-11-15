@@ -29,6 +29,8 @@ export function useBakeMeta(planId: string): BakeMeta | null | undefined {
 }
 
 const texLoader = new THREE.TextureLoader();
+/** Overall brightness of baked light in the browser (1 = exactly what Cycles computed). */
+const BAKE_EXPOSURE = 1.75;
 
 export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: string; meta: BakeMeta; visibleLevels: number }) {
   const { scene } = useGLTF(baseUrl(planId) + 'baked.glb');
@@ -39,7 +41,9 @@ export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: str
       tex.flipY = false;               // glTF UV convention
       tex.channel = 1;                 // second UV set (TEXCOORD_1)
       tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 8;
+      // no mipmaps: lightmap islands are tightly packed and mip levels bleed dark texels across seams
+      tex.generateMipmaps = false;
+      tex.minFilter = THREE.LinearFilter;
       lightmaps.set(l.level, { tex, scale: l.scale });
     }
     const o = scene.clone(true);
@@ -62,7 +66,7 @@ export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: str
           map: src?.map ?? null,
           lightMap: lm?.tex ?? null,
           // Cycles' diffuse light pass is radiance for a white surface; three divides lightmaps by π
-          lightMapIntensity: (lm?.scale ?? 1) * Math.PI,
+          lightMapIntensity: (lm?.scale ?? 1) * Math.PI * BAKE_EXPOSURE,
         }));
       }
       mesh.material = mats.get(cacheKey)!;

@@ -169,12 +169,18 @@ for lv in levels:
     print(f'baking level {lv} ({len(me.polygons)} faces) at {a.res}px, {a.samples} spp…', flush=True)
     bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=6, use_clear=True)
 
-    # light denoise (small separable blur), scale into 0..1, sRGB-encode, save 8-bit
+    # denoise with Intel Open Image Denoise's lightmap filter (pip install pyoidn); fall back to a small blur
     px = np.empty(a.res * a.res * 4, dtype=np.float32); img.pixels.foreach_get(px)
-    px = px.reshape(a.res, a.res, 4)[:, :, :3]
-    k = np.array([1, 4, 6, 4, 1], dtype=np.float32); k /= k.sum()
-    for axis in (0, 1):
-        px = sum(np.roll(px, s - 2, axis=axis) * k[s] for s in range(5))
+    px = np.ascontiguousarray(px.reshape(a.res, a.res, 4)[:, :, :3])
+    try:
+        import pyoidn
+        px = np.asarray(pyoidn.denoise(px, filter_type=pyoidn.OIDN_FILTER_TYPE_RT_LIGHTMAP), dtype=np.float32)
+        print('  denoised with OIDN (RTLightmap)', flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f'  OIDN unavailable ({e}); using blur', flush=True)
+        k = np.array([1, 4, 6, 4, 1], dtype=np.float32); k /= k.sum()
+        for axis in (0, 1):
+            px = sum(np.roll(px, s - 2, axis=axis) * k[s] for s in range(5))
     lit = px[px.max(axis=2) > 1e-4]
     scale = float(np.percentile(lit, 99.5)) if lit.size else 1.0
     enc = np.clip(px / scale, 0, 1)

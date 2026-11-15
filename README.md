@@ -73,6 +73,40 @@ Scene: ~670k triangles, ~600 draw calls with shadows, 19 MB of assets (models 15
 `High` = 4k soft sun shadows + N8AO + bloom + SMAA. `Fast` = no shadows or AO, DPR ≤ 1.25
 (default on screens ≤ 700px wide).
 
+## Photoreal lighting: offline bake (Blender Cycles)
+
+Real-time lighting cannot match V-Ray, so the walls, floors, ceilings and stairs are lit offline by Blender's
+path tracer and the result is baked into lightmaps. The browser draws them as `albedo × baked light`, the
+same value Cycles computed, including sun, sky, every fixture, bounce light and the furniture's shadows.
+Furniture keeps real-time PBR lighting. If `public/baked/<plan id>/bake.json` is missing, the viewer falls back
+to real-time lighting (`?nobake` forces that for comparison).
+
+```bash
+# one-time: Blender as a Python module + Intel Open Image Denoise
+python3 -m venv .bake && .bake/bin/pip install bpy==5.3.0 pyoidn
+
+# 1. export the built house and its light fixtures from the running site
+npm run build && npx vite preview --port 4173 &
+#    open http://localhost:4173/?q=fast&export, scroll to the walkthrough, then read
+#    window.__exportGlb (ArrayBuffer -> house.glb) and window.__exportLights (-> lights.json)
+
+# 2. bake (CPU, 4 cores: ~4 min per floor at 1024 px / 256 samples)
+.bake/bin/python scripts/bake/bake.py house.glb lights.json out --res 1024 --samples 256 \
+  --hdri public/assets/hdri/kloofendal_43d_clear_puresky.hdr
+#    add --preview x,y,eyeZ,heading --only-preview for a single path-traced still
+
+# 3. publish: copy baked.glb, the lm_L*.png (or WebP) lightmaps and bake.json to public/baked/<plan id>/
+```
+
+A GPU machine (CUDA/OptiX) bakes 10-20x faster, which makes 2048 px maps and per-furniture baking practical.
+
+### SketchUp projects
+
+SketchUp exports glTF (free Khronos glTF exporter extension) or FBX. That file replaces step 1: the designer's
+own model, with the actual furniture they specify, goes straight into the bake. Work still needed: tag static
+architecture vs. furniture (by SketchUp tag/layer), place lights from their light components, and choose
+walkthrough viewpoints.
+
 ## Phase 2: upload a 2D plan
 
 The renderer is ready for it; the open problem is turning a drawing into a `HousePlan`. In order of
