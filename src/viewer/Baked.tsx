@@ -19,7 +19,9 @@ const baseUrl = (planId: string) => `${import.meta.env.BASE_URL}baked/${planId}/
 export function useBakeMeta(planId: string): BakeMeta | null | undefined {
   const [meta, setMeta] = useState<BakeMeta | null | undefined>(undefined);
   useEffect(() => {
-    if (new URLSearchParams(location.search).has('nobake')) { setMeta(null); return; }
+    const qs = new URLSearchParams(location.search);
+    // ?export must capture the plain architecture, so it never loads an existing bake
+    if (qs.has('nobake') || qs.has('export')) { setMeta(null); return; }
     let live = true;
     fetch(baseUrl(planId) + 'bake.json').then((r) => (r.ok ? r.json() : null)).catch(() => null)
       .then((m) => { if (live) setMeta(m && Array.isArray(m.levels) ? m : null); });
