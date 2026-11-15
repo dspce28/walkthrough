@@ -66,6 +66,8 @@ export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: str
           name: key,
           color: src?.color ?? new THREE.Color('#ffffff'),
           map: src?.map ?? null,
+          aoMap: src?.aoMap ?? null,
+          aoMapIntensity: src?.aoMapIntensity ?? 1,
           lightMap: lm?.tex ?? null,
           // Cycles' diffuse light pass is radiance for a white surface; three divides lightmaps by π
           lightMapIntensity: (lm?.scale ?? 1) * Math.PI * BAKE_EXPOSURE,

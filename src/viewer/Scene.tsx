@@ -9,6 +9,7 @@ import type { CompiledPlan } from '../plan/compile';
 import type { HousePlan } from '../plan/types';
 import { Architecture } from './Architecture';
 import { BakedArchitecture, useBakeMeta } from './Baked';
+import { activeStyle } from '../style';
 import { FalseCeilings } from './FalseCeilings';
 import { Furniture } from './Furniture';
 import { getMat } from './materials';
@@ -32,13 +33,14 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
   const evening = settings.time === 'evening';
   const hi = settings.quality === 'high';
   const bake = useBakeMeta(plan.id);
+  const style = activeStyle().lighting;
   useEffect(() => { PRELOAD.forEach((id) => useGLTF.preload(MODEL_URL(id))); }, []);
   return (
     <>
-      <Environment files={HDRI(CITY_HDRI)} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : 0.55} />
+      <Environment files={HDRI(CITY_HDRI)} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : style.envIntensity} />
       <fog attach="fog" args={['#c9cdc8', 140, 520]} />
       <Sun evening={evening} hi={hi} />
-      <hemisphereLight args={['#e3ecf3', '#d6c7ad', evening ? 0.08 : 0.45]} />
+      <hemisphereLight args={['#e3ecf3', '#d6c7ad', evening ? 0.08 : style.hemiIntensity]} />
       <InteriorLights compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} evening={evening} />
       <Site compiled={compiled} neighbours={settings.mode === 'walk'} />
 {/* baked (Cycles) walls/floors/ceilings when available; glass and curtains always stay real-time */}
@@ -117,8 +119,8 @@ export function lightAnchors(plan: HousePlan): Anchor[] {
   const lit = new Set<string>();
   for (const it of plan.items) {
     const cx = it.rot % 2 ? it.x + it.d / 2 : it.x + it.w / 2, cy = it.rot % 2 ? it.y + it.w / 2 : it.y + it.d / 2;
-    if (it.type === 'chandelier') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 1.6, strength: 1.4, color: '#ffd9a8' });
-    if (it.type === 'pendant') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 2.6, strength: 0.8, color: '#ffe2b8' });
+    if (it.type === 'chandelier') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 1.6, strength: 1.4, color: activeStyle().lighting.chandelier });
+    if (it.type === 'pendant') a.push({ level: it.level, x: cx, y: cy, z: it.level * FH + CH - 2.6, strength: 0.8, color: activeStyle().lighting.pendant });
     if (it.type === 'chandelier' || it.type === 'pendant') {
       const r = plan.rooms.find((r) => r.level === it.level && cx >= r.rect[0] && cx <= r.rect[2] && cy >= r.rect[1] && cy <= r.rect[3]);
       if (r) lit.add(`${r.level}:${r.name}:${r.rect.join()}`);
@@ -129,7 +131,7 @@ export function lightAnchors(plan: HousePlan): Anchor[] {
     if (lit.has(`${r.level}:${r.name}:${r.rect.join()}`)) continue;
     const area = (x2 - x1) * (y2 - y1);
     const outdoor = /terrace|porch|yard|balcony/i.test(r.name);
-    a.push({ level: r.level, x: (x1 + x2) / 2, y: (y1 + y2) / 2, z: r.level * FH + CH - (outdoor ? 1.2 : 0.4), strength: Math.min(1.2, 0.4 + area / 80), color: '#fff0dc' });
+    a.push({ level: r.level, x: (x1 + x2) / 2, y: (y1 + y2) / 2, z: r.level * FH + CH - (outdoor ? 1.2 : 0.4), strength: Math.min(1.2, 0.4 + area / 80), color: activeStyle().lighting.ceiling });
   }
   return a;
 }
@@ -159,7 +161,7 @@ function InteriorLights({ compiled, nav, visibleLevels, evening }: { compiled: C
       if (!c) { L.intensity = 0; continue; }
       L.position.set(c.a.x, c.a.z, c.a.y);
       L.color.set(c.a.color);
-      L.intensity = c.a.strength * (evening ? 26 : 9);
+      L.intensity = c.a.strength * (evening ? 26 : 9) * activeStyle().lighting.lampBoost;
     }
   });
   return <>{Array.from({ length: POOL }, (_, i) => <pointLight key={i} ref={(l) => { refs.current[i] = l; }} distance={22} decay={1.6} intensity={0} />)}</>;

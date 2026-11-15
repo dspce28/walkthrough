@@ -38,7 +38,10 @@ and profile lights; fluted / panelled feature walls; arched niches; modular join
 - The current bake in `public/baked/` predates the false ceilings: re-export and re-bake next session.
 
 ## Next steps (in order)
-1. **Style kit structure** `src/style/modernLuxe.ts`: materials (white large-format marble floor, greige textured walls),
+1. ~~**Style kit structure**~~ DONE: `src/style/kit.ts` (StyleKit, `roomType()` classifier), `src/style/modernLuxe.ts`
+   (materials incl. white marble with grout AO map, ceiling rule by room type, lighting colours/intensities),
+   `src/style/index.ts` (`applyStyle`, `activeStyle`), selected in `src/viewer/Viewer.tsx`. Kit lighting colours feed
+   `lightAnchors`, so the next `?export` + bake picks up the neutral lamps. Original text: `src/style/modernLuxe.ts`: materials (white large-format marble floor, greige textured walls),
    ceiling rules, feature-wall rules, furniture/decor choices. Apply by rules from room type, not hand placement.
 2. **Feature walls**: fluted panel TV wall (hall, master), upholstered/panel bed wall, arched temple niche, wardrobe trims.
 3. **Decor props** per room type (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).

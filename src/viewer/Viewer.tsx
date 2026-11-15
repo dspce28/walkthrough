@@ -5,7 +5,10 @@ import * as THREE from 'three';
 import type { CompiledPlan } from '../plan/compile';
 import { planSVG } from '../plan2d/planSvg';
 import { DOLL_CAMERA, Scene, type HudInfo, type Quality } from './Scene';
+import { applyStyle, modernLuxeKit } from '../style/select';
 import { setHiresModels } from './parts';
+
+applyStyle(modernLuxeKit);
 import { createNav, TourPlayer } from './walk';
 
 const KEYMAP: Record<string, string> = { KeyW: 'f', ArrowUp: 'f', KeyS: 'b', ArrowDown: 'b', ArrowLeft: 'l', ArrowRight: 'r', KeyA: 'sl', KeyD: 'sr', KeyQ: 'l', KeyE: 'r' };

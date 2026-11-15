@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { HousePlan } from '../plan/types';
+import { activeStyle } from '../style';
 import { falseCeilings, type GlowWash } from '../style/falseCeiling';
 import { mergedBoxes } from './geometry';
 import { getMat } from './materials';
@@ -31,7 +32,7 @@ export function FalseCeilings({ plan, visibleLevels }: { plan: HousePlan; visibl
 
 function build(plan: HousePlan) {
   const FH = plan.floorHeight;
-  const { boxes, washes } = falseCeilings(plan);
+  const { boxes, washes } = falseCeilings(plan, activeStyle().ceiling);
   const groups = new Map<string, { level: number; mat: string; boxes: Parameters<typeof mergedBoxes>[0] }>();
   for (const b of boxes) {
     const k = `${b.level}:${b.mat}`;

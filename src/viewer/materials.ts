@@ -4,7 +4,7 @@ const BASE = import.meta.env.BASE_URL + 'assets/';
 const loader = new THREE.TextureLoader();
 const texCache = new Map<string, THREE.Texture>();
 
-function tex(id: string, map: 'diff' | 'nor' | 'rough', repeatFt: number): THREE.Texture {
+export function tex(id: string, map: 'diff' | 'nor' | 'rough', repeatFt: number): THREE.Texture {
   const key = `${id}/${map}/${repeatFt}`;
   let t = texCache.get(key);
   if (!t) {
@@ -20,7 +20,7 @@ function tex(id: string, map: 'diff' | 'nor' | 'rough', repeatFt: number): THREE
 }
 
 /** PBR set from a Poly Haven texture. Geometry UVs must be in world feet. */
-function pbr(id: string, tileFt: number, o: Omit<THREE.MeshStandardMaterialParameters, 'normalScale'> & { noRough?: boolean; normalScale?: number } = {}) {
+export function pbr(id: string, tileFt: number, o: Omit<THREE.MeshStandardMaterialParameters, 'normalScale'> & { noRough?: boolean; normalScale?: number } = {}) {
   const { noRough, normalScale, ...rest } = o;
   const m = new THREE.MeshStandardMaterial({
     map: tex(id, 'diff', tileFt), normalMap: tex(id, 'nor', tileFt), roughnessMap: noRough ? null : tex(id, 'rough', tileFt), ...rest,
@@ -29,7 +29,7 @@ function pbr(id: string, tileFt: number, o: Omit<THREE.MeshStandardMaterialParam
   return m;
 }
 
-const std = (color: string, roughness: number, metalness = 0, extra: THREE.MeshStandardMaterialParameters = {}) =>
+export const std = (color: string, roughness: number, metalness = 0, extra: THREE.MeshStandardMaterialParameters = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
 
 /** Lazily created, shared materials. Keys are used by architecture boxes and procedural furniture. */
@@ -90,17 +90,43 @@ const makers: Record<string, () => THREE.Material> = {
   rope: () => std('#c8b48a', 1),
 };
 
+/** Material overrides from the active style kit (see src/style). Must be set before the scene mounts. */
+let overrides: Record<string, () => THREE.Material> = {};
+export function setStyleMaterials(o: Record<string, () => THREE.Material>) { overrides = o; cache.clear(); }
+
 const cache = new Map<string, THREE.Material>();
 export function getMat(key: string): THREE.Material {
   let m = cache.get(key);
   if (!m) {
-    const make = makers[key];
+    const make = overrides[key] ?? makers[key];
     if (!make) throw new Error(`unknown material ${key}`);
     m = make();
     m.name = key;
     cache.set(key, m);
   }
   return m;
+}
+
+/**
+ * Tile joints as an ambient-occlusion map (white tile, thin dark grout), tiled every `tileFt` feet on the
+ * world-feet UVs. AO darkens indirect light, so the joints also show on baked (lightmapped) floors.
+ */
+export function groutMap(tileFt: number, shade = 0.45): THREE.Texture {
+  const key = `grout:${tileFt}:${shade}`;
+  const hit = texCache.get(key);
+  if (hit) return hit;
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#fff'; g.fillRect(0, 0, 512, 512);
+  const v = Math.round(255 * shade);
+  g.fillStyle = `rgb(${v},${v},${v})`;
+  g.fillRect(0, 0, 512, 6); g.fillRect(0, 0, 6, 512);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(1 / tileFt, 1 / tileFt);
+  t.anisotropy = 8;
+  texCache.set(key, t);
+  return t;
 }
 
 /** Canvas texture for a bordered Persian-style rug. */
