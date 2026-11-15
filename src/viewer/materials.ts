@@ -40,6 +40,7 @@ const makers: Record<string, () => THREE.Material> = {
   slab: () => std('#f2eee4', 0.95, 0, { emissive: '#3a3630' }),
   slabGround: () => pbr('patio_tiles', 6, { color: '#d9d3c4' }),
   coping: () => std('#efe9dc', 0.6),
+  ceilingBand: () => std('#f7f5f0', 0.85, 0, { emissive: '#3a3630' }),
   stairCore: () => std('#ece6d8', 0.9),
   tread: () => pbr('granite_tile', 3, { color: '#8a8580', roughness: 0.35, noRough: true }),
   frame: () => pbr('dark_wood', 3, { color: '#9a8270' }),

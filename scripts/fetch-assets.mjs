@@ -49,6 +49,8 @@ export const TEXTURES = [
 ];
 
 export const HDRIS = ['kloofendal_43d_clear_puresky', 'brown_photostudio_02'];
+/** City skyline seen through windows; 2K so the skyline stays sharp as a background. */
+export const HDRIS_2K = ['homecoming_center_rooftop'];
 
 const api = (p) => fetch(`https://api.polyhaven.com/${p}`).then((r) => {
   if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`);
@@ -96,11 +98,11 @@ async function texture(id) {
   return n ? 'ok' : 'skip';
 }
 
-async function hdri(id) {
+async function hdri(id, res = '1k') {
   const dest = path.join(OUT, 'hdri', `${id}.hdr`);
   if (!FORCE && await exists(dest)) return 'skip';
   const files = await api(`files/${id}`);
-  await download(files.hdri['1k'].hdr.url, dest);
+  await download(files.hdri[res].hdr.url, dest);
   return 'ok';
 }
 
@@ -109,6 +111,7 @@ const jobs = [
   ...HIRES.map((id) => ['model2k', id, (i) => model(i, true)]),
   ...TEXTURES.map((id) => ['texture', id, texture]),
   ...HDRIS.map((id) => ['hdri', id, hdri]),
+  ...HDRIS_2K.map((id) => ['hdri', id, (i) => hdri(i, '2k')]),
 ];
 let failed = 0;
 const queue = [...jobs];

@@ -30,7 +30,12 @@ and profile lights; fluted / panelled feature walls; arched niches; modular join
 
 ## Done in the session that wrote this brief
 - City skyline environment behind windows/terrace (CC0 HDRI).
-- Rule-based false ceilings with cove LED + profile lights (`src/style/falseCeiling.ts`), named `arch|` so the next bake includes them.
+- City skyline: `homecoming_center_rooftop` (2K HDRI, `CITY_HDRI` in `src/viewer/Scene.tsx`). Its towers are taller than Ahmedabad's.
+- Rule-based false ceilings (`src/style/falseCeiling.ts`, rendered by `src/viewer/FalseCeilings.tsx`): perimeter band,
+  cove shelf with LED strip, profile-light line; skipped over stairwells and in wet/outdoor/small rooms. Bands and strips
+  are named `arch|L<n>|ceilingBand` / `coveGlow` so the next bake includes them (strips emit light in Cycles; `Baked.tsx`
+  keeps `glow` self-lit). The cove light washes are real-time fakes (`fx|…`), not baked.
+- The current bake in `public/baked/` predates the false ceilings: re-export and re-bake next session.
 
 ## Next steps (in order)
 1. **Style kit structure** `src/style/modernLuxe.ts`: materials (white large-format marble floor, greige textured walls),

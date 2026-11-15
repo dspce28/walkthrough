@@ -9,6 +9,7 @@ import type { CompiledPlan } from '../plan/compile';
 import type { HousePlan } from '../plan/types';
 import { Architecture } from './Architecture';
 import { BakedArchitecture, useBakeMeta } from './Baked';
+import { FalseCeilings } from './FalseCeilings';
 import { Furniture } from './Furniture';
 import { getMat } from './materials';
 import { MODEL_URL } from './parts';
@@ -20,6 +21,8 @@ export const DOLL_CAMERA: [number, number, number] = [30, 38, -34];
 export type TimeOfDay = 'day' | 'evening';
 export interface SceneSettings { visibleLevels: number; quality: Quality; time: TimeOfDay; mode: 'doll' | 'walk' }
 
+/** City skyline behind windows and terraces (generic CC0; no free Ahmedabad panorama exists). */
+const CITY_HDRI = 'homecoming_center_rooftop';
 const HDRI = (id: string) => `${import.meta.env.BASE_URL}assets/hdri/${id}.hdr`;
 
 const PRELOAD = ['Sofa_01', 'sofa_03', 'ArmChair_01', 'GreenChair_01', 'Chandelier_01', 'ClassicConsole_01', 'potted_plant_02', 'potted_plant_04', 'modern_coffee_table_01', 'vintage_cabinet_01', 'modern_wooden_cabinet'];
@@ -32,7 +35,7 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
   useEffect(() => { PRELOAD.forEach((id) => useGLTF.preload(MODEL_URL(id))); }, []);
   return (
     <>
-      <Environment files={HDRI('kloofendal_43d_clear_puresky')} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : 0.55} />
+      <Environment files={HDRI(CITY_HDRI)} background backgroundIntensity={evening ? 0.12 : 1} environmentIntensity={evening ? 0.1 : 0.55} />
       <fog attach="fog" args={['#c9cdc8', 140, 520]} />
       <Sun evening={evening} hi={hi} />
       <hemisphereLight args={['#e3ecf3', '#d6c7ad', evening ? 0.08 : 0.45]} />
@@ -42,6 +45,7 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
       {bake && <Suspense fallback={null}><BakedArchitecture planId={plan.id} meta={bake} visibleLevels={settings.visibleLevels} /></Suspense>}
             <Architecture compiled={compiled} glazingOnly={!!bake} visibleLevels={settings.visibleLevels}
         cutAt={settings.mode === 'doll' && settings.visibleLevels < plan.levels.length ? settings.visibleLevels * plan.floorHeight + 7 : null} />
+      <FalseCeilings plan={plan} visibleLevels={settings.visibleLevels} />
       <Suspense fallback={null}>
         <Furniture plan={plan} visibleLevels={settings.visibleLevels} />
       </Suspense>

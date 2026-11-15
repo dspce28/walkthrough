@@ -57,6 +57,8 @@ export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: str
       mesh.userData.level = level;
       const key = (mesh.material as THREE.Material).name.replace(/\.\d+$/, '');
       const cacheKey = `${level}:${key}`;
+      // emitters (LED strips) stay self-lit rather than albedo × lightmap
+      if (key === 'glow') { mesh.material = getMat('glow'); return; }
       if (!mats.has(cacheKey)) {
         let src: THREE.MeshStandardMaterial | null = null;
         try { src = getMat(key) as THREE.MeshStandardMaterial; } catch { src = null; }
