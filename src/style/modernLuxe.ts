@@ -39,9 +39,21 @@ export const modernLuxe: StyleKit = {
     // upholstery: muted velvet instead of saturated burgundy / navy
     burgundy: () => fabric('velour_velvet', '#9c8273'),
     navy: () => fabric('velour_velvet', '#7d8790'),
+    // upholstery and decor props
+    boucle: () => fabric('wool_boucle', '#ece6dc', 0.6),
+    outdoorFabric: () => fabric('wool_boucle', '#d9d2c6', 0.9),
+    knit: () => fabric('wool_boucle', '#cdbba3', 0.4),
+    accentSage: () => fabric('velour_velvet', '#9ba38d'),
+    accentClay: () => fabric('velour_velvet', '#b88c71'),
+    ceramicMatte: () => std('#efebe4', 0.55),
+    darkMetal: () => std('#2e2c29', 0.4, 0.85),
+    pampas: () => std('#e3d3b6', 1),
+    pampasStem: () => std('#c9b48f', 0.9),
+    bookA: () => std('#d8cfc2', 0.8), bookB: () => std('#7c8a86', 0.8), bookC: () => std('#b3a089', 0.8),
     // wet areas: large grey stone-look tiles
     'floor:tile': () => pbr('large_grey_tiles', 4, { color: '#e2dfda', roughness: 0.3, noRough: true }),
   },
   ceiling: { rooms: ['living', 'dining', 'kitchen', 'bedroom', 'office'], band: 1.6, drop: 1.0, shelf: 0.4, minRoom: 6 },
+  decor: { cornerPlants: ['living', 'bedroom', 'office', 'dining'] },
   lighting: { envIntensity: 0.75, hemiIntensity: 0.55, chandelier: '#ffe2bf', pendant: '#ffe7c9', ceiling: '#fff1e0', lampBoost: 1.15 },
 };

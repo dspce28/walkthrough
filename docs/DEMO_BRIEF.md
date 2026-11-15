@@ -50,7 +50,12 @@ and profile lights; fluted / panelled feature walls; arched niches; modular join
    painted frames); fabrics use colour + texture normal map only (Poly Haven fabric colours unsuitable).
    Export now tags meshes by their nearest `arch|`/`furn|` ancestor. `?view=<n>` deep-links walk mode to viewpoint n.
    Original text: fluted panel TV wall (hall, master), upholstered/panel bed wall, arched temple niche, wardrobe trims.
-3. **Decor props** per room type (also replace the classic chandeliers/armchair/Persian rugs/zigzag pillows with modern picks) (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
+3. ~~**Decor props**~~ DONE: per-style item renderers `src/viewer/styles/modernLuxeItems.tsx` (looked up in
+   `Furniture.tsx` via `STYLE_ITEMS`): bouclé sofa + cushions + throw, halo LED chandelier, modern rug, stone drum coffee
+   table, marble dining table, fluted oak sideboard with glass/LED shelves, slim console + round mirror, bed with neutral
+   cushions/throw, modern armchair, `dining_chair_02` model; decor props (pampas, sculpture, book stacks, bowls) live on
+   those pieces. `src/style/decor.ts` adds corner plants by rule (clear of furniture, doors, stairs).
+   KNOWN: dark smudges on walls are old-furniture shadows in the OLD bake; re-bake fixes. Original text: Decor props per room type (also replace the classic chandeliers/armchair/Persian rugs/zigzag pillows with modern picks) (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
 4. **Exposure**: brighter high-key look; re-bake with neutral 3500-4000K lights (`--lamp-watts`, lamp colours in `lightAnchors`).
 5. **Re-export + re-bake** (`?export` then `bake.py`), copy to `public/baked/g2-house/`, tune `BAKE_EXPOSURE`.
 6. **Cinematic tour**: ~15 composed slow shots auto-generated per room (eye level, 5 s each), plus free walk.

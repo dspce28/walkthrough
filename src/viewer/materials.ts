@@ -167,6 +167,31 @@ export function rugMaterial(kind: 'burgundy' | 'blue', w: number, d: number): TH
   return m;
 }
 
+/** Modern hand-tufted rug: warm greige field with soft tonal shapes and a fine border. */
+export function modernRugMaterial(w: number, d: number): THREE.MeshStandardMaterial {
+  const key = `mrug:${w}x${d}`;
+  const hit = cache.get(key) as THREE.MeshStandardMaterial | undefined;
+  if (hit) return hit;
+  const px = 64, cw = Math.round(w * px), ch = Math.round(d * px);
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const g = c.getContext('2d')!;
+  let seed = Math.round(w * 13 + d * 7); const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#d9d0c3'; g.fillRect(0, 0, cw, ch);
+  for (let i = 0; i < 5; i++) {
+    g.fillStyle = ['#cfc4b4', '#e4ddd2', '#c8baa6', '#ddd5c9', '#bfb09b'][i];
+    g.globalAlpha = 0.7;
+    g.beginPath(); g.ellipse(rnd() * cw, rnd() * ch, cw * (0.15 + rnd() * 0.3), ch * (0.1 + rnd() * 0.25), rnd() * 3, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = 1; g.strokeStyle = '#b8a991'; g.lineWidth = 6; g.strokeRect(22, 22, cw - 44, ch - 44);
+  const img = g.getImageData(0, 0, cw, ch);
+  for (let i = 0; i < img.data.length; i += 4) { const n = (rnd() - 0.5) * 16; img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n; }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const m = new THREE.MeshStandardMaterial({ map: t, roughness: 1 });
+  cache.set(key, m);
+  return m;
+}
+
 /** Simple painted-canvas artwork texture. */
 export function artMaterial(kind: string): THREE.MeshStandardMaterial {
   const key = `art:${kind}`;

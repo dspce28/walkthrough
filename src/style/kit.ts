@@ -43,4 +43,6 @@ export interface StyleKit {
   materials: Record<string, () => THREE.Material>;
   ceiling: CeilingRule;
   lighting: LightingRule;
+  /** room types that get rule-placed corner plants */
+  decor?: { cornerPlants: RoomType[] };
 }

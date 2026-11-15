@@ -1,6 +1,12 @@
-import { memo, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { memo, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { mergeStatic } from './mergeStatic';
+import { activeStyle } from '../style';
+import { cornerPlants } from '../style/decor';
+import { MODERN_LUXE_ITEMS } from './styles/modernLuxeItems';
+
+/** Per-style item renderers; types a style does not override use the default catalogue below. */
+const STYLE_ITEMS: Record<string, Partial<Record<Item['type'], R>>> = { 'modern-luxe': MODERN_LUXE_ITEMS };
 import type { HousePlan, Item } from '../plan/types';
 import { itemTransform } from '../plan/compile';
 import { artMaterial, rugMaterial } from './materials';
@@ -376,7 +382,7 @@ const PlacedItem = memo(function PlacedItem({ it, fh, ch }: { it: Item; fh: numb
   const t = itemTransform(it);
   return (
     <group position={[t.x, it.level * fh, t.y]} rotation-y={t.yaw}>
-      {RENDER[it.type](it, ch)}
+      {(STYLE_ITEMS[activeStyle().id]?.[it.type] ?? RENDER[it.type])(it, ch)}
     </group>
   );
 });
@@ -404,10 +410,15 @@ function LevelFurniture({ level, items, fh, ch, visible }: { level: number; item
 
 /** All furniture. Must sit inside a Suspense boundary: it suspends until every model has loaded. */
 export function Furniture({ plan, visibleLevels }: { plan: HousePlan; visibleLevels: number }) {
+  // style-placed decor (corner plants) joins the plan's own items
+  const items = useMemo(() => {
+    const rule = activeStyle().decor;
+    return rule ? [...plan.items, ...cornerPlants(plan, rule.cornerPlants)] : plan.items;
+  }, [plan]);
   return (
     <group>
       {plan.levels.map((_, L) => (
-        <LevelFurniture key={L} level={L} items={plan.items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L <= visibleLevels} />
+        <LevelFurniture key={L} level={L} items={items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L <= visibleLevels} />
       ))}
     </group>
   );

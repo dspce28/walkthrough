@@ -25,7 +25,7 @@ export const MODELS = [
   'mid_century_lounge_chair', 'bar_chair_round_01', 'potted_plant_02', 'potted_plant_04',
   'fancy_picture_frame_01', 'hanging_picture_frame_02', 'brass_diya_lantern', 'brass_vase_01', 'ceramic_vase_01',
   'throw_pillows_01', 'wall_clock', 'desk_lamp_arm_01', 'planter_box_01',
-  'wicker_basket_01', 'modern_ceiling_lamp_01', 'vintage_microwave', 'painted_wooden_sofa',
+  'wicker_basket_01', 'modern_ceiling_lamp_01', 'vintage_microwave', 'painted_wooden_sofa', 'dining_chair_02',
 ];
 
 /** Models that are too dense for real-time use get decimated: [fraction of triangles kept, max error]. */
