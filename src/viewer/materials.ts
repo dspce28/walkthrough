@@ -41,6 +41,11 @@ const makers: Record<string, () => THREE.Material> = {
   slabGround: () => pbr('patio_tiles', 6, { color: '#d9d3c4' }),
   coping: () => std('#efe9dc', 0.6),
   ceilingBand: () => std('#f7f5f0', 0.85, 0, { emissive: '#3a3630' }),
+  // feature-wall / joinery slots that style kits restyle (defaults keep the classic walnut look)
+  tvBack: () => getMat('walnutD'),
+  tvFlute: () => getMat('walnut'),
+  'feature:panel': () => getMat('linen'),
+  'feature:stone': () => pbr('marble_01', 4, { color: '#efe7da', roughness: 0.25, noRough: true }),
   stairCore: () => std('#ece6d8', 0.9),
   tread: () => pbr('granite_tile', 3, { color: '#8a8580', roughness: 0.35, noRough: true }),
   frame: () => pbr('dark_wood', 3, { color: '#9a8270' }),

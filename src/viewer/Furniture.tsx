@@ -86,8 +86,8 @@ const RENDER: Record<Item['type'], R> = {
     const w = it.w, side = it.o?.compact ? 0.9 : 1.1;
     return <>
       {/* fluted walnut back panel */}
-      <Bx a={[0, 0, w, 0.1]} y={[0, 7.6]} m="walnutD" />
-      {Array.from({ length: Math.floor((w - 2 * side) / 0.22) }, (_, i) => <Cyl key={i} c={[side + 0.11 + i * 0.22, 0.12]} r={0.06} y={[1.9, 7.4]} m="walnut" seg={10} />)}
+      <Bx a={[0, 0, w, 0.1]} y={[0, 7.6]} m="tvBack" />
+      {Array.from({ length: Math.floor((w - 2 * side) / 0.22) }, (_, i) => <Cyl key={i} c={[side + 0.11 + i * 0.22, 0.12]} r={0.06} y={[1.9, 7.4]} m="tvFlute" seg={10} />)}
       <Model id="modern_wooden_cabinet" w={w - 2 * side} d={1.35} h={1.7} at={[w / 2, 0, 0.75]} maxStretch={1.8} />
       {/* TV */}
       <Rb a={[w / 2 - 2.15, 0.16, w / 2 + 2.15, 0.3]} y={[3.1, 5.55]} m="black" r={0.03} />

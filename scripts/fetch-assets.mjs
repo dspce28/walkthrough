@@ -46,6 +46,8 @@ export const HIRES = [
 export const TEXTURES = [
   'marble_01', 'herringbone_parquet', 'oak_wood_planks', 'floor_tiles_06', 'large_grey_tiles', 'patio_tiles',
   'wood_floor_deck', 'plastered_wall', 'dark_wood', 'granite_tile', 'grey_tiles',
+  // Modern Luxe joinery and upholstery
+  'white_oak_veneer', 'grey_oak_veneer_01', 'wool_boucle', 'velour_velvet',
 ];
 
 export const HDRIS = ['kloofendal_43d_clear_puresky', 'brown_photostudio_02'];

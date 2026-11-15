@@ -43,8 +43,14 @@ and profile lights; fluted / panelled feature walls; arched niches; modular join
    `src/style/index.ts` (`applyStyle`, `activeStyle`), selected in `src/viewer/Viewer.tsx`. Kit lighting colours feed
    `lightAnchors`, so the next `?export` + bake picks up the neutral lamps. Original text: `src/style/modernLuxe.ts`: materials (white large-format marble floor, greige textured walls),
    ceiling rules, feature-wall rules, furniture/decor choices. Apply by rules from room type, not hand placement.
-2. **Feature walls**: fluted panel TV wall (hall, master), upholstered/panel bed wall, arched temple niche, wardrobe trims.
-3. **Decor props** per room type (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
+2. ~~**Feature walls**~~ DONE: rule in `src/style/featureWalls.ts` (finds the wall behind beds/temples from the item's
+   back edge + room outline), rendered by `src/viewer/FeatureWalls.tsx` in a local wall frame: bouclé panel grid + oak
+   fluting + champagne trim/LED behind beds; stone arch with LED around the temple niche. TV wall = `tvBack` (marble) +
+   `tvFlute` (oak) slots in the tvUnit renderer. Joinery restyled via kit overrides (white/grey oak veneer, champagne metal,
+   painted frames); fabrics use colour + texture normal map only (Poly Haven fabric colours unsuitable).
+   Export now tags meshes by their nearest `arch|`/`furn|` ancestor. `?view=<n>` deep-links walk mode to viewpoint n.
+   Original text: fluted panel TV wall (hall, master), upholstered/panel bed wall, arched temple niche, wardrobe trims.
+3. **Decor props** per room type (also replace the classic chandeliers/armchair/Persian rugs/zigzag pillows with modern picks) (free models: Poly Haven vases, books, plants, frames + procedural throws/cushions).
 4. **Exposure**: brighter high-key look; re-bake with neutral 3500-4000K lights (`--lamp-watts`, lamp colours in `lightAnchors`).
 5. **Re-export + re-bake** (`?export` then `bake.py`), copy to `public/baked/g2-house/`, tune `BAKE_EXPOSURE`.
 6. **Cinematic tour**: ~15 composed slow shots auto-generated per room (eye level, 5 s each), plus free walk.

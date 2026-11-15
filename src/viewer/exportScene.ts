@@ -8,11 +8,17 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 export async function exportHouse(scene: THREE.Scene): Promise<ArrayBuffer> {
   scene.updateMatrixWorld(true);
   const out = new THREE.Scene();
+  const TAG = /^(arch|furn)\|/;
+  let n = 0;
   scene.traverse((o) => {
     const m = o as THREE.Mesh;
-    if (!m.isMesh || !/^(arch|furn)\|/.test(m.name)) return;
+    if (!m.isMesh) return;
+    // a mesh is exported if it, or a group above it, carries an arch|/furn| name
+    let tagged: THREE.Object3D | null = m;
+    while (tagged && !TAG.test(tagged.name)) tagged = tagged.parent;
+    if (!tagged) return;
     const c = new THREE.Mesh(m.geometry, m.material);
-    c.name = m.name;
+    c.name = tagged === m ? m.name : `${tagged.name}|${n++}`;
     m.matrixWorld.decompose(c.position, c.quaternion, c.scale);
     out.add(c);
   });

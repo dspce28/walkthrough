@@ -49,7 +49,9 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   const walkInside = () => {
     stopTour(); applyMode('walk');
     // start just inside the main door, looking into the hall
-    const v = plan.viewpoints.find((p) => p.level === 0 && p.y > 0) ?? plan.viewpoints[0];
+    // ?view=<n> deep-links to a viewpoint (handy for sharing a specific room)
+    const qs = new URLSearchParams(location.search).get('view');
+    const v = (qs != null ? plan.viewpoints[Number(qs)] : undefined) ?? plan.viewpoints.find((p) => p.level === 0 && p.y > 0) ?? plan.viewpoints[0];
     nav.px = v.x; nav.py = v.y; nav.pz = nav.cz = v.level * plan.floorHeight; nav.heading = v.heading; nav.pitch = v.pitch ?? 0;
   };
 

@@ -11,6 +11,7 @@ import { Architecture } from './Architecture';
 import { BakedArchitecture, useBakeMeta } from './Baked';
 import { activeStyle } from '../style';
 import { FalseCeilings } from './FalseCeilings';
+import { FeatureWalls } from './FeatureWalls';
 import { Furniture } from './Furniture';
 import { getMat } from './materials';
 import { MODEL_URL } from './parts';
@@ -48,6 +49,7 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
             <Architecture compiled={compiled} glazingOnly={!!bake} visibleLevels={settings.visibleLevels}
         cutAt={settings.mode === 'doll' && settings.visibleLevels < plan.levels.length ? settings.visibleLevels * plan.floorHeight + 7 : null} />
       <FalseCeilings plan={plan} visibleLevels={settings.visibleLevels} />
+      <FeatureWalls plan={plan} visibleLevels={settings.visibleLevels} />
       <Suspense fallback={null}>
         <Furniture plan={plan} visibleLevels={settings.visibleLevels} />
       </Suspense>
