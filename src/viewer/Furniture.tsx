@@ -409,7 +409,7 @@ function LevelFurniture({ level, items, fh, ch, visible }: { level: number; item
 }
 
 /** All furniture. Must sit inside a Suspense boundary: it suspends until every model has loaded. */
-export function Furniture({ plan, visibleLevels }: { plan: HousePlan; visibleLevels: number }) {
+export function Furniture({ plan, visibleLevels, visibleFrom = 0 }: { plan: HousePlan; visibleLevels: number; visibleFrom?: number }) {
   // style-placed decor (corner plants) joins the plan's own items
   const items = useMemo(() => {
     const rule = activeStyle().decor;
@@ -418,7 +418,7 @@ export function Furniture({ plan, visibleLevels }: { plan: HousePlan; visibleLev
   return (
     <group>
       {plan.levels.map((_, L) => (
-        <LevelFurniture key={L} level={L} items={items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L <= visibleLevels} />
+        <LevelFurniture key={L} level={L} items={items.filter((it) => it.level === L)} fh={plan.floorHeight} ch={plan.ceilingHeight} visible={L >= visibleFrom && L <= visibleLevels} />
       ))}
     </group>
   );

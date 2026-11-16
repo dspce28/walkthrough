@@ -9,12 +9,12 @@ import { Bx, Rb } from './parts';
  * Renders rule-placed feature walls. Each wall gets a local frame: x = along the wall (0..span), y = up,
  * z = depth into the room. Groups are named `arch|L<n>|feature…` so the offline bake includes them.
  */
-export function FeatureWalls({ plan, visibleLevels }: { plan: HousePlan; visibleLevels: number }) {
+export function FeatureWalls({ plan, visibleLevels, visibleFrom = 0 }: { plan: HousePlan; visibleLevels: number; visibleFrom?: number }) {
   const walls = useMemo(() => featureWalls(plan), [plan]);
   return (
     <group>
       {walls.map((w, i) => (
-        <WallFrame key={i} w={w} base={w.level * plan.floorHeight} name={`arch|L${w.level}|feature${i}`} visible={w.level <= visibleLevels}>
+        <WallFrame key={i} w={w} base={w.level * plan.floorHeight} name={`arch|L${w.level}|feature${i}`} visible={w.level >= visibleFrom && w.level <= visibleLevels}>
           {w.kind === 'bedPanel' ? <BedPanel span={w.a2 - w.a1} top={plan.ceilingHeight - 1.3} /> : <TempleArch w={w} />}
         </WallFrame>
       ))}

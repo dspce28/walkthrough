@@ -35,6 +35,11 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   }, [entrance, plan]);
   const [quality] = useState<Quality>(() => { const q = autoQuality(); setHiresModels(q === 'high'); return q; });
   const [touring, setTouring] = useState(false);
+  /** 'walk' = first person; 'floor' = 360° single-floor 3D view of floor `floor` */
+  const [mode, setMode] = useState<'walk' | 'floor'>('walk');
+  const [floor, setFloor] = useState(0);
+  const showFloor = (L: number) => { nav.tour = null; setTouring(false); nav.mode = 'doll'; nav.resetDoll = true; setFloor(L); setMode('floor'); };
+  const walk = () => { nav.mode = 'walk'; setMode('walk'); };
   const [hud, setHud] = useState<HudInfo>({ level: 0, room: '', tourProgress: null, px: 0, py: 0, heading: 0 });
   const miniRef = useRef<HTMLDivElement>(null);
   const miniLevel = useRef(-1);
@@ -42,6 +47,7 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   const stopTour = useCallback(() => { nav.tour = null; setTouring(false); }, [nav]);
 
   const startTour = useCallback(() => {
+    nav.mode = 'walk'; setMode('walk');
     const t = plan.tour[0];
     nav.px = t[0]; nav.py = t[1]; nav.pz = nav.cz = 0; nav.heading = 0; nav.pitch = 0.04;
     nav.tour = new TourPlayer(plan.tour);
@@ -50,7 +56,7 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   }, [nav, plan]);
 
   const backToEntrance = () => {
-    stopTour();
+    stopTour(); walk();
     nav.px = entrance.x; nav.py = entrance.y; nav.pz = nav.cz = entrance.level * plan.floorHeight; nav.heading = entrance.heading; nav.pitch = entrance.pitch ?? 0;
   };
 
@@ -86,7 +92,7 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
   });
 
   const level = plan.levels[hud.level]?.name ?? '';
-  const where = hud.room || level;
+  const where = mode === 'floor' ? plan.levels[floor].name : hud.room || level;
 
   return (
     <div className="stage">
@@ -98,20 +104,20 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
         gl={{ antialias: false, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
       >
         <Suspense fallback={null}>
-          <Scene compiled={compiled} nav={nav} settings={{ visibleLevels: plan.levels.length, quality, time: 'day', mode: 'walk' }} onHud={setHud} />
+          <Scene compiled={compiled} nav={nav} settings={mode === 'floor' ? { visibleLevels: floor, visibleFrom: floor, quality, time: 'day', mode: 'doll' } : { visibleLevels: plan.levels.length, quality, time: 'day', mode: 'walk' }} onHud={setHud} />
         </Suspense>
       </Canvas>
 
       <div className="hud" aria-live="polite">
-        <span className="hud-eyebrow">{touring ? 'Guided tour' : level}</span>
+        <span className="hud-eyebrow">{mode === 'floor' ? '3D floor view · 360°' : touring ? 'Guided tour' : level}</span>
         <span className="hud-title">{where}</span>
         {touring && hud.tourProgress != null && <span className="hud-progress"><i style={{ width: `${hud.tourProgress * 100}%` }} /></span>}
       </div>
 
       <Loader />
 
-      <div className="mini" ref={miniRef} aria-hidden="true" />
-      {!touring && (
+      {mode === 'walk' && <div className="mini" ref={miniRef} aria-hidden="true" />}
+      {mode === 'walk' && !touring && (
         <div className="pad">
           <button className="f" aria-label="Move forward" {...pad('f')}>▲</button>
           <button className="l" aria-label="Turn left" {...pad('l')}>◀</button>
@@ -121,13 +127,22 @@ export function Viewer({ compiled, active }: { compiled: CompiledPlan; active: b
       )}
 
       <div className="controls" role="toolbar" aria-label="3D view controls">
-        <button className="ghost" onClick={backToEntrance}>Back to entrance</button>
+        <div className="toggle" role="group" aria-label="View">
+          <button aria-pressed={mode === 'walk'} onClick={backToEntrance}>Walk inside</button>
+          <button aria-pressed={mode === 'floor'} onClick={() => showFloor(floor)}>3D floor view</button>
+        </div>
+        {mode === 'floor' && (
+          <div className="toggle" role="group" aria-label="Floor">
+            {plan.levels.map((l, i) => <button key={i} aria-pressed={floor === i} onClick={() => showFloor(i)}>{l.name.split(' ')[0]}</button>)}
+          </div>
+        )}
         <button className="gold" onClick={() => (touring ? stopTour() : startTour())}>
           {touring ? <><span className="ic">❚❚</span>Stop tour</> : <><span className="ic">▶</span>Play guided tour</>}
         </button>
       </div>
 
-      <p className="hint">{touring ? 'Drag or press a key to take control' : 'W A S D or arrows to move · Drag to look · Climb the stairs to change floor'}</p>
+      <p className="hint">{mode === 'floor' ? 'Drag to rotate 360° · Scroll or pinch to zoom · Right-drag to pan'
+        : touring ? 'Drag or press a key to take control' : 'W A S D or arrows to move · Drag to look · Climb the stairs to change floor'}</p>
     </div>
   );
 }

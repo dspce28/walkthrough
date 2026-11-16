@@ -2,7 +2,7 @@ import { Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Bloom, EffectComposer, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { CompiledPlan } from '../plan/compile';
@@ -21,7 +21,8 @@ export type Quality = 'high' | 'fast';
 /** Default dollhouse framing: three-quarter view from the road side, whole house in frame. */
 export const DOLL_CAMERA: [number, number, number] = [30, 38, -34];
 export type TimeOfDay = 'day' | 'evening';
-export interface SceneSettings { visibleLevels: number; quality: Quality; time: TimeOfDay; mode: 'doll' | 'walk' }
+/** mode 'doll' = single-floor 3D view: only floor `visibleLevels` (from `visibleFrom`), cut at 7 ft, orbiting. */
+export interface SceneSettings { visibleLevels: number; visibleFrom?: number; quality: Quality; time: TimeOfDay; mode: 'doll' | 'walk' }
 
 /** City skyline behind windows and terraces (generic CC0; no free Ahmedabad panorama exists). */
 const CITY_HDRI = 'homecoming_center_rooftop';
@@ -45,16 +46,16 @@ export function Scene({ compiled, nav, settings, onHud }: { compiled: CompiledPl
       <InteriorLights compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} evening={evening} />
       <Site compiled={compiled} neighbours={settings.mode === 'walk'} />
 {/* baked (Cycles) walls/floors/ceilings when available; glass and curtains always stay real-time */}
-      {bake && <Suspense fallback={null}><BakedArchitecture planId={plan.id} meta={bake} visibleLevels={settings.visibleLevels} /></Suspense>}
-            <Architecture compiled={compiled} glazingOnly={!!bake} visibleLevels={settings.visibleLevels}
-        cutAt={settings.mode === 'doll' && settings.visibleLevels < plan.levels.length ? settings.visibleLevels * plan.floorHeight + 7 : null} />
-      <FalseCeilings plan={plan} visibleLevels={settings.visibleLevels} />
-      <FeatureWalls plan={plan} visibleLevels={settings.visibleLevels} />
+      {bake && <Suspense fallback={null}><BakedArchitecture planId={plan.id} meta={bake} visibleLevels={settings.visibleLevels} visibleFrom={settings.visibleFrom ?? 0} /></Suspense>}
+            <Architecture compiled={compiled} glazingOnly={!!bake} visibleLevels={settings.visibleLevels} visibleFrom={settings.visibleFrom ?? 0} cutAt={null} />
+      <FalseCeilings plan={plan} visibleLevels={settings.visibleLevels} visibleFrom={settings.visibleFrom ?? 0} />
+      <FeatureWalls plan={plan} visibleLevels={settings.visibleLevels} visibleFrom={settings.visibleFrom ?? 0} />
       <Suspense fallback={null}>
-        <Furniture plan={plan} visibleLevels={settings.visibleLevels} />
+        <Furniture plan={plan} visibleLevels={settings.visibleLevels} visibleFrom={settings.visibleFrom ?? 0} />
       </Suspense>
       {new URLSearchParams(location.search).has('debug') ? <DebugStats /> : null}
       {new URLSearchParams(location.search).has('export') ? <ExportForBake plan={plan} /> : null}
+      <FloorCut on={settings.mode === 'doll'} z={settings.visibleLevels * plan.floorHeight + 7} />
       <CameraRig compiled={compiled} nav={nav} visibleLevels={settings.visibleLevels} onHud={onHud} />
       {hi ? (
         <EffectComposer multisampling={0} enableNormalPass={false}>
@@ -154,7 +155,7 @@ function InteriorLights({ compiled, nav, visibleLevels, evening }: { compiled: C
     last.current = state.clock.elapsedTime;
     const camLevel = nav.mode === 'walk' ? Math.round(nav.pz / plan.floorHeight - 0.2) : visibleLevels;
     const p = camera.position, focus = nav.mode === 'walk' ? new THREE.Vector3(p.x, p.y, p.z) : new THREE.Vector3(6, visibleLevels * plan.floorHeight + 4, 19);
-    const cand = anchors.filter((a) => a.level <= Math.min(visibleLevels, plan.levels.length - 1) && (nav.mode === 'doll' || a.level === camLevel))
+    const cand = anchors.filter((a) => (nav.mode === 'doll' ? a.level === visibleLevels : a.level === camLevel))
       .map((a) => ({ a, d: (a.x - focus.x) ** 2 + (a.z - focus.y) ** 2 * 4 + (a.y - focus.z) ** 2 }))
       .sort((u, v) => u.d - v.d).slice(0, POOL);
     for (let i = 0; i < POOL; i++) {
@@ -170,6 +171,16 @@ function InteriorLights({ compiled, nav, visibleLevels, evening }: { compiled: C
 }
 
 export interface HudInfo { level: number; room: string; tourProgress: number | null; px: number; py: number; heading: number }
+
+/** Single-floor view: one renderer-wide clipping plane cuts walls, furniture and hanging lights at the same height. */
+function FloorCut({ on, z }: { on: boolean; z: number }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.clippingPlanes = on ? [new THREE.Plane(new THREE.Vector3(0, -1, 0), z)] : [];
+    return () => { gl.clippingPlanes = []; };
+  }, [gl, on, z]);
+  return null;
+}
 
 /** ?export: once every floor's furniture is merged, export the house GLB and light list for the offline bake. */
 function ExportForBake({ plan }: { plan: HousePlan }) {
@@ -210,6 +221,13 @@ function CameraRig({ compiled, nav, visibleLevels, onHud }: { compiled: Compiled
   const { camera, gl } = useThree();
   useEffect(() => { gl.localClippingEnabled = true; }, [gl]);
   const orbit = useRef<OrbitControlsImpl>(null);
+  const [spin, setSpin] = useState(true);
+  useEffect(() => { setSpin(true); }, [visibleLevels]);
+  /** centre of the floor being shown (single-floor view) */
+  const floorCentre = () => {
+    const L = Math.min(visibleLevels, plan.levels.length - 1), [x1, y1, x2, y2] = plan.extents[L];
+    return new THREE.Vector3((x1 + x2) / 2, L * plan.floorHeight + 2, (y1 + y2) / 2);
+  };
   const walker = useMemo(() => makeWalker(compiled), [compiled]);
   const plan = compiled.plan;
   const hudT = useRef(0);
@@ -240,13 +258,12 @@ function CameraRig({ compiled, nav, visibleLevels, onHud }: { compiled: Compiled
       if (lastMode.current !== 'doll' || nav.resetDoll) {
         nav.resetDoll = false;
         cam.fov = 45; cam.updateProjectionMatrix();
-        // pull back on portrait screens so the whole house still fits
-        const ty = Math.max(2, Math.min(visibleLevels, 2) * plan.floorHeight + 2), k = cam.aspect < 1 ? 1 / Math.max(0.45, cam.aspect) : 1;
-        camera.position.set(6 + (DOLL_CAMERA[0] - 6) * k, ty + (DOLL_CAMERA[1] - ty) * k, 19 + (DOLL_CAMERA[2] - 19) * k);
-        orbit.current?.target.set(6, ty, 19);
+        // high three-quarter view of the chosen floor; pulled back on portrait screens
+        const c = floorCentre(), k = cam.aspect < 1 ? 1 / Math.max(0.45, cam.aspect) : 1;
+        camera.position.set(c.x + 26 * k, c.y + 34 * k, c.z - 22 * k);
+        orbit.current?.target.copy(c);
       }
-      const ty = Math.max(2, Math.min(visibleLevels, 2) * plan.floorHeight + 2);
-      if (orbit.current) { orbit.current.target.lerp(new THREE.Vector3(6, ty, 19), Math.min(1, dt * 4)); orbit.current.update(); }
+      if (orbit.current) { orbit.current.target.lerp(floorCentre(), Math.min(1, dt * 4)); orbit.current.update(); }
     } else {
       if (lastMode.current !== 'walk') { cam.fov = 68; cam.updateProjectionMatrix(); }
       if (nav.tour) {
@@ -275,6 +292,7 @@ function CameraRig({ compiled, nav, visibleLevels, onHud }: { compiled: Compiled
   });
 
   return nav.mode === 'doll'
-    ? <OrbitControls ref={orbit} makeDefault enableDamping dampingFactor={0.08} minDistance={14} maxDistance={140} maxPolarAngle={1.48} target={[6, 2, 19]} />
+    ? <OrbitControls ref={orbit} makeDefault enableDamping dampingFactor={0.08} minDistance={14} maxDistance={120} maxPolarAngle={1.35}
+        autoRotate={spin} autoRotateSpeed={0.7} onStart={() => setSpin(false)} />
     : null;
 }

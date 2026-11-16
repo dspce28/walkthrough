@@ -73,7 +73,7 @@ export default function App() {
         <header className="section-head">
           <p className="eyebrow">Experience</p>
           <h2>3D Walkthrough</h2>
-          <p className="section-lede">Step inside and walk freely, or let the guided tour lead you through all three floors.</p>
+          <p className="section-lede">Walk through every room, spin each floor in 360°, or let the guided tour lead you through all three floors.</p>
         </header>
         <div className="stage-wrap" ref={stageRef}>
           {loaded3d ? (

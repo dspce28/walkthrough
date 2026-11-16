@@ -34,7 +34,7 @@ const texLoader = new THREE.TextureLoader();
 /** Overall brightness of baked light in the browser (1 = exactly what Cycles computed). */
 const BAKE_EXPOSURE = 1.75;
 
-export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: string; meta: BakeMeta; visibleLevels: number }) {
+export function BakedArchitecture({ planId, meta, visibleLevels, visibleFrom = 0 }: { planId: string; meta: BakeMeta; visibleLevels: number; visibleFrom?: number }) {
   const { scene } = useGLTF(baseUrl(planId) + 'baked.glb');
   const root = useMemo(() => {
     const lightmaps = new Map<number, { tex: THREE.Texture; scale: number }>();
@@ -82,8 +82,8 @@ export function BakedArchitecture({ planId, meta, visibleLevels }: { planId: str
   }, [scene, meta, planId]);
 
   useEffect(() => {
-    root.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.visible = (n.userData.level as number) <= visibleLevels; });
-  }, [root, visibleLevels]);
+    root.traverse((n) => { if ((n as THREE.Mesh).isMesh) { const l = n.userData.level as number; n.visible = l >= visibleFrom && l <= visibleLevels; } });
+  }, [root, visibleLevels, visibleFrom]);
 
   return <primitive object={root} />;
 }

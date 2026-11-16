@@ -11,7 +11,8 @@ import { getMat } from './materials';
  * includes them (the emissive strips become real light sources in Cycles). The light washes are a real-time
  * stand-in for that bounce light and are left out of the bake.
  */
-export function FalseCeilings({ plan, visibleLevels }: { plan: HousePlan; visibleLevels: number }) {
+export function FalseCeilings({ plan, visibleLevels, visibleFrom = 0 }: { plan: HousePlan; visibleLevels: number; visibleFrom?: number }) {
+  const shown = (l: number) => l >= visibleFrom && l <= visibleLevels;
   const { batches, washes } = useMemo(() => build(plan), [plan]);
   const washMat = useMemo(() => new THREE.MeshBasicMaterial({
     map: gradientTexture(), color: '#ffc77a', transparent: true, opacity: 0.85,
@@ -21,10 +22,10 @@ export function FalseCeilings({ plan, visibleLevels }: { plan: HousePlan; visibl
     <group>
       {batches.map((b) => (
         <mesh key={`${b.level}:${b.mat}`} name={`arch|L${b.level}|${b.mat === 'glow' ? 'coveGlow' : 'ceilingBand'}`} geometry={b.geo}
-          material={getMat(b.mat)} visible={b.level <= visibleLevels} castShadow={b.mat !== 'glow'} receiveShadow />
+          material={getMat(b.mat)} visible={shown(b.level)} castShadow={b.mat !== 'glow'} receiveShadow />
       ))}
       {washes.map((w) => (
-        <mesh key={w.level} name={`fx|L${w.level}|coveWash`} geometry={w.geo} material={washMat} visible={w.level <= visibleLevels} renderOrder={6} />
+        <mesh key={w.level} name={`fx|L${w.level}|coveWash`} geometry={w.geo} material={washMat} visible={shown(w.level)} renderOrder={6} />
       ))}
     </group>
   );
